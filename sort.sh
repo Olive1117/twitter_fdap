@@ -3,7 +3,7 @@ mkdir -p "./temp/data"
 if [[ -n $(ls -A ./temp/data) ]]; then
   rm ./temp/data/*
 fi
-if [[ $(ls ./data/.json) ]]; then
+if [[ -f ./data/.json ]]; then
   rm ./data/.json
 fi
 source_dir="./temp/data"  # 源目录路径
@@ -17,7 +17,7 @@ echo "Processing JSON files, this may take a while..."
 python3 sort/split.py
 
 echo "🕒Time: "$(date +"%Y-%m-%d %H:%M:%S")" "$(date +%Z)"" > ./diff.txt
-echo '*'$(cat ./temp/target_number-1.txt)' Followers, '$(cat ./temp/target_number-2.txt)' Following*' >> ./diff.txt
+echo '*'$(jq 'length' ~/Downloads/twitter-Followers*.json)' Followers, '$(jq 'length' ~/Downloads/twitter-Following*.json)' Following*' >> ./diff.txt
 
 # Step 1: Checking for mutual unfollow
 python3 sort/step1.py
@@ -37,8 +37,7 @@ while IFS= read -r id; do
     name=$(jq -r '.name' "$target_file")
     screen_name=$(jq -r '.screen_name' "$target_file")
     echo "\`$name\` @\`$screen_name\`" >> ./diff.txt
-    jq '.removed = "true"' "$target_file" > $target_file-temp.json
-    mv $target_file-temp.json $target_dir/removed/$(basename $target_file)
+    mv $target_file $target_dir/removed/$(basename $target_file)
     echo $id >> ./data/removed_list.txt
   fi
 done < "$source_dir/mutual_unfollow.txt"
@@ -96,7 +95,7 @@ sort -u $target_dir/removed_list.txt | grep -v '^\s*$' > $target_dir/removed_lis
 mv $target_dir/removed_list_temp.txt $target_dir/removed_list.txt
 echo "Updating data..."
 python3 sort/upd.py
-
+mv ./diff.txt ./data/diff.txt
   cd ./data
   git add --all
   git commit -m "$(date +"%Y-%m-%d %H:%M:%S")"

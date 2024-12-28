@@ -21,7 +21,7 @@ with open(single_unfollowing_path, 'w') as single_unfollowing_file:
                     following_target = str(target_data.get('following'))
                     following_source = str(source_data.get('following'))
 
-                    if following_target == "True" and following_source == "None":
+                    if following_target == "True" and (following_source == "None" or following_source == "False"):
                         single_unfollowing_file.write(f"{target_data['id']}\n")
 
                 except json.JSONDecodeError:

@@ -47,14 +47,18 @@ async def check_page_content(uri, target_number):
         value = int(value)
         print(f"Current fetched count: {value}")
 
-        # 计算范围
-        lower_bound = value - 2
-        upper_bound = value + 2
-
         # 检查目标数字是否在范围内
+        reduce_response = await send_js_code(uri, "if (document.querySelector('pre.leading-none.text-xs.max-h-48.bg-base-200')) { parseInt(document.querySelector('pre.leading-none.text-xs.max-h-48.bg-base-200').textContent.split('\\n').reduce((sum, line) => sum + (line.match(/Followers: (\\\\d+) items received/) ? (50 - parseInt(line.match(/Followers: (\\\\d+) items received/)[1], 10)) : 0), 0)); }")
         target_number = int(target_number)
-        if lower_bound <= target_number <= upper_bound:
-            print(f"Target number {target_number} found!")
+        reduce_count = reduce_response.get("result", {}).get("result", {}).get("value")
+        if reduce_count is None:
+            print("Failed to extract reduced count.")
+            return False
+
+        reduce_count = int(reduce_count)
+        real_target_number = target_number - reduce_count
+        if real_target_number == value:
+            print(f"Target number {real_target_number} found!")
             return True
         else:
             return False
@@ -77,7 +81,6 @@ async def scroll_page(uri, first_time):
 
                 """
                 button_exists = await send_js_code(uri, check_button_js)
-                #exists = button_exists.get("result", {}).get("result", {}).get("value", {}).get("exists", True)
 
                 if button_exists.get('result', {}).get('result', {}).get('value') is True:
                     print("Looks like you've hit the Twitter's rate limit. Retrying, this may take a while.")
@@ -88,7 +91,6 @@ async def scroll_page(uri, first_time):
                     # 点击按钮
                     await send_js_code(uri, "document.querySelector('.css-175oi2r.r-4d76ec').querySelector('button').click();")
 
-
                 await asyncio.sleep(0.2)  # 每次滑动之间等待0.2秒
 
             # 获取更新后的页面内容
@@ -98,7 +100,6 @@ async def scroll_page(uri, first_time):
             """
             response = await send_js_code(uri, js_code)
             page_content = response.get("result", {}).get("result", {}).get("value", "")
-            print("Page content collected:", page_content)
 
     except Exception as e:
         print(f"Error in scroll_page: {e}")

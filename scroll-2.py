@@ -3,7 +3,6 @@ import websockets
 import json
 import time
 
-
 async def send_js_code(uri, script):
     async with websockets.connect(uri) as websocket:
         js_code = {
@@ -17,7 +16,6 @@ async def send_js_code(uri, script):
         await websocket.send(json.dumps(js_code))
         response = await websocket.recv()
         return json.loads(response)
-
 
 async def monitor_page(uri, target_number):
     first_time = True  # 初始时为第一次调用
@@ -34,7 +32,6 @@ async def monitor_page(uri, target_number):
             print(f"Connection closed, retrying: {e}")
             await asyncio.sleep(1)  # 等待1秒后重试连接
 
-
 async def check_page_content(uri, target_number):
     try:
         # 执行 JavaScript 获取页面内容
@@ -50,21 +47,26 @@ async def check_page_content(uri, target_number):
         value = int(value)
         print(f"Current fetched count: {value}")
 
-        # 计算范围
-        lower_bound = value - 2
-        upper_bound = value + 2
-
         # 检查目标数字是否在范围内
+        reduce_response = await send_js_code(uri, "if (document.querySelector('pre.leading-none.text-xs.max-h-48.bg-base-200')) { parseInt(document.querySelector('pre.leading-none.text-xs.max-h-48.bg-base-200').textContent.split('\\n').reduce((sum, line) => sum + (line.match(/Following: (\\\\d+) items received/) ? (50 - parseInt(line.match(/Following: (\\\\d+) items received/)[1], 10)) : 0), 0)); }")
+
         target_number = int(target_number)
-        if lower_bound <= target_number <= upper_bound:
-            print(f"Target number {target_number} found!")
+        reduce_count = reduce_response.get("result", {}).get("result", {}).get("value")
+
+        if reduce_count is None:
+            print("Failed to extract reduced count.")
+            return False
+
+        reduce_count = int(reduce_count)
+        real_target_number = target_number - reduce_count
+        if real_target_number == value:
+            print(f"Target number {real_target_number} found!")
             return True
         else:
             return False
     except Exception as e:
         print(f"Error in check_page_content: {e}")
         return False
-
 
 async def scroll_page(uri, first_time):
     try:
@@ -87,10 +89,8 @@ async def scroll_page(uri, first_time):
                 (() => {
                         return document.querySelector('.css-175oi2r.r-sdzlij.r-1phboty.r-rs99b7.r-lrvibr.r-2yi16.r-1qi8awa.r-3pj75a.r-1loqt21.r-o7ynqc.r-6416eg.r-1ny4l3l') !== null;
                     })();
-
                 """
                 button_exists = await send_js_code(uri, check_button_js)
-                #exists = button_exists.get("result", {}).get("result", {}).get("value", {}).get("exists", True)
 
                 if button_exists.get('result', {}).get('result', {}).get('value') is True:
                     print("Looks like you've hit the Twitter's rate limit. Retrying, this may take a while.")
@@ -110,11 +110,9 @@ async def scroll_page(uri, first_time):
             """
             response = await send_js_code(uri, js_code)
             page_content = response.get("result", {}).get("result", {}).get("value", "")
-            print("Page content collected:", page_content)
 
     except Exception as e:
         print(f"Error in scroll_page: {e}")
-
 
 async def main():
     # 从文件中读取 WebSocket URL
@@ -126,7 +124,6 @@ async def main():
         target_number = file.read().strip()
 
     await monitor_page(websocket_url, target_number)
-
 
 if __name__ == "__main__":
     asyncio.run(main())

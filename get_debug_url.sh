@@ -1,8 +1,16 @@
 #!/bin/bash
-
-# 获取调试端点 URL
-DEBUG_URL=$(curl -s http://localhost:9222/json | jq -r '.[0].webSocketDebuggerUrl')
-
-# 输出调试端点 URL
-echo $DEBUG_URL
-
+ID=$(cat info/id.txt)
+while true
+do
+JSON_DATA=$(curl -s http://localhost:9222/json)
+MATCHED_BLOCK=$(echo "$JSON_DATA" | jq -r --arg id "$ID" '.[] | select(.url | contains($id))')
+if [ -n "$MATCHED_BLOCK" ]; then
+    DEBUG_URL=$(echo "$MATCHED_BLOCK" | jq -r '.webSocketDebuggerUrl')
+    echo "$DEBUG_URL" > ./temp/debug_url.txt
+    cat ./temp/debug_url.txt
+    break
+else
+    echo "$ID not found."
+    sleep 1
+fi
+done
