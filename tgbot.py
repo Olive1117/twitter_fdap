@@ -18,7 +18,7 @@ bot = Bot(token=TOKEN)
 
 async def send_file_content():
     try:
-        with open('diff.txt', 'r') as file:
+        with open('./data/diff.txt', 'r') as file:
             content = file.read()
 
         await bot.send_message(

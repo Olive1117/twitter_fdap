@@ -31,6 +31,6 @@ def process_json_files(file_pattern, source_dir):
                 print(f"Error decoding JSON in file {file_path}: {e}")
 
 # 处理 Followers 和 Following JSON 文件
-process_json_files(os.path.expanduser("~/Downloads/twitter-Followers-*.json"), source_dir)
-process_json_files(os.path.expanduser("~/Downloads/twitter-Following-*.json"), source_dir)
+process_json_files(os.path.expanduser("./temp/twitter-Followers-*.json"), source_dir)
+process_json_files(os.path.expanduser("./temp/twitter-Following-*.json"), source_dir)
 

@@ -17,7 +17,7 @@ echo "Processing JSON files, this may take a while..."
 python3 sort/split.py
 
 echo "🕒Time: "$(date +"%Y-%m-%d %H:%M:%S")" "$(date +%Z)"" > ./diff.txt
-echo '*'$(jq 'length' ~/Downloads/twitter-Followers*.json)' Followers, '$(jq 'length' ~/Downloads/twitter-Following*.json)' Following*' >> ./diff.txt
+echo '*'$(jq 'length' ./temp/twitter-Followers*.json)' Followers, '$(jq 'length' ./temp/twitter-Following*.json)' Following*' >> ./diff.txt
 
 # Step 1: Checking for mutual unfollow
 python3 sort/step1.py
@@ -112,4 +112,4 @@ if [[ -s "info/githubrepo.txt" ]]; then
   cd ..
 fi
 
-cat ./diff.txt
+cat ./data/diff.txt
