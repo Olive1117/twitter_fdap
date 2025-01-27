@@ -2,6 +2,7 @@
 
 A Linux script for exporting and checking the diff in your X/Twitter follower and following lists automatically.
 
+English | [简体中文](README.CN.md)
 # Contact Me
 
 Contact me on [Twitter](https://x.com/Ak1raQ_love) @Ak1raQ_love.
