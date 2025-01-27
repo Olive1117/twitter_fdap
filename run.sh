@@ -1,7 +1,7 @@
 #!/bin/bash
 clear
 rm -rf ./temp/*
-pkill -f vncserver
+#pkill -f vncserver
 figlet -k -W "FDAP"
 echo 'https://github.com/MtFloveU/twitter_fdap'
 echo ' '
@@ -10,11 +10,11 @@ sleep 2
 #vncserver :2 -xstartup "/usr/bin/xterm" > /dev/null 2>&1
 #sleep 1
 #export DISPLAY=:2
-#DISPLAY=:2 chromium-browser "https://x.com/"$(cat info/id.txt) --start-maximized --remote-debugging-port=9222 --no-sandbox --disable-gpu > /dev/null 2>&1 &
-chromium-browser "https://x.com/"$(cat info/id.txt) --remote-debugging-port=9222 --no-sandbox --disable-gpu --headless=new --User-Agent='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36' --user-data-dir=./chromium-data --start-maximized --window-size=1920,1080 --enable-low-end-device-mode > /dev/null 2>&1 &
+#DISPLAY=:2 google-chrome "https://x.com/"$(cat info/id.txt) --remote-debugging-port=9222 --no-sandbox --disable-gpu --User-Agent='TwitterAndroid/10.76.0-release.0 (310760000-r-0) CPH2609/15 (OnePlus;CPH2609;OnePlus;CPH2609;0;;1;2016)' --user-data-dir=./chromium-data --start-maximized --window-size=1920,1080 --enable-low-end-device-mode > /dev/null 2>&1 &
+google-chrome "https://x.com/"$(cat info/id.txt) --remote-debugging-port=9222 --no-sandbox --disable-gpu --headless=new --User-Agent='TwitterAndroid/10.76.0-release.0 (310760000-r-0) CPH2609/15 (OnePlus;CPH2609;OnePlus;CPH2609;0;;1;2016)' --user-data-dir=./chromium-data --start-maximized --window-size=1920,1080 --enable-low-end-device-mode > /dev/null 2>&1 &
 CHROMIUM_PID=$!
 #cpulimit -p $CHROMIUM_PID -l 60 &
-echo 'Starting Chromium browser...'
+echo 'Starting Google Chrome...'
 while true; do
   sleep 0.1
   if curl -s http://127.0.0.1:9222/json > /dev/null; then
@@ -22,7 +22,6 @@ while true; do
     break
   fi
 done
-echo "Opening your Twitter profile..."
 sleep 1
 ./get_debug_url.sh > /dev/null
 while true; do
@@ -32,9 +31,8 @@ while true; do
     python3 ./get_followers_count.py
     sleep 0.5
 done
-echo "The number was loaded."
 python3 ./open.py
-echo "Waiting for the website fully loaded..."
+echo "Waiting..."
 sleep 3
 echo "Fetching your follower lists..."
 
@@ -51,7 +49,6 @@ python3 ./export.py
 sleep 2
 pkill -9 $CHROMIUM_PID
 pkill -f chrome
-pkill -f chromium
 ./sort.sh
 rm -rf ./temp/*
 #pkill -f cpulimit

@@ -16,8 +16,8 @@ The script is intended for my personal use. It may cause bugs or errors when run
 
 - A Linux computer
 - Python3 with the websockets module
-- Chromium with Tampermonkey installed
-- Signed in to your Twitter account in Chromium
+- Google Chrome with Tampermonkey installed
+- Signed in to your Twitter account in Google Chrome
 - Install and enable [twitter-web-exporter](https://github.com/prinsss/twitter-web-exporter) v1.2.0 in Tampermonkey (Note: Please use my modified `twitter-web-exporter.js` in this FDAP script)
 - Expand the menu in twitter-web-exporter
 - Port 9992 should be available
@@ -34,13 +34,13 @@ You must obtain an initial version of the follow list to use this script.
 
 1. Change your dir to the script
 
-2. Start Chromium with `--user-data-dir=./chromium-data`
+2. Start Google Chrome with `--user-data-dir=./chromium-data`
 
 3. Install tampermonkey and my modified twitter-web-exporter
 
 4. Set the download dictionary to `./temp`
 
-5. Sign in your Twitter Account and visit [https://x.com/[Your-Twitter-ID]/followers/](https://x.com/%5BYour-Twitter-ID%5D/followers/) in Chromium
+5. Sign in your Twitter Account and visit [https://x.com/[Your-Twitter-ID]/followers/](https://x.com/%5BYour-Twitter-ID%5D/followers/)
 
 6. Allow `x.com` pop-ups and Automatic downloads
 
@@ -53,17 +53,17 @@ You must obtain an initial version of the follow list to use this script.
 10. Use the same method to export the 'following' list.
 
 11. Run the following commands in the directory of this script:
-    
+
     ```bash
     cd data
     git config --global init.defaultBranch main
     git init
     ```
-    
+
     (Alternatively, create a repository on GitHub and run `git clone [Your repo URL]`)
-    
+
     Then run:
-    
+
     ```bash
     jq -c '.[]' ~/Downloads/twitter-Followers-*.json | while read -r item; do
       id=$(echo "$item" | jq -r '.id')
@@ -96,7 +96,3 @@ Then, `cd` to the `data` folder and run:
 ```bash
 git remote set-url origin https://your_username:your_token@[Your repo URL]
 ```
-
-# Demonstration Video
-
-Temporarily unavailable.                

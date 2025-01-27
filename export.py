@@ -14,7 +14,6 @@ async def send_js_code(uri, script):
         }
         await websocket.send(json.dumps(js_code))
         response = await websocket.recv()
-        print(response)  # Print the response after executing the command
         return json.loads(response)  # Parse the response into JSON
 
 async def main(uri):
