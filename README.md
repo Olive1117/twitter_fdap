@@ -3,6 +3,7 @@
 A Linux script for exporting and checking the diff in your X/Twitter follower and following lists automatically.
 
 English | [简体中文](README.CN.md)
+
 # Contact Me
 
 Contact me on [Twitter](https://x.com/Ak1raQ_love) @Ak1raQ_love.
@@ -54,17 +55,17 @@ You must obtain an initial version of the follow list to use this script.
 10. Use the same method to export the 'following' list.
 
 11. Run the following commands in the directory of this script:
-
+    
     ```bash
     cd data
     git config --global init.defaultBranch main
     git init
     ```
-
+    
     (Alternatively, create a repository on GitHub and run `git clone [Your repo URL]`)
-
+    
     Then run:
-
+    
     ```bash
     jq -c '.[]' ~/Downloads/twitter-Followers-*.json | while read -r item; do
       id=$(echo "$item" | jq -r '.id')
@@ -90,9 +91,7 @@ Enter your Telegram User ID (a number) in `info/tguserid.txt`.
 
 ### Push to GitHub repository
 
-Enter the link to your GitHub repository in `info/githubrepo.txt`.
-
-Then, `cd` to the `data` folder and run:
+ Change to the `data` folder and run:
 
 ```bash
 git remote set-url origin https://your_username:your_token@[Your repo URL]

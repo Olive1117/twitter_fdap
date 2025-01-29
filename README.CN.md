@@ -91,9 +91,7 @@
 
 ### 推送到 GitHub 仓库
 
-在 `info/githubrepo.txt` 中输入你的 GitHub 仓库链接。
-
-然后，`cd` 到 `data` 文件夹并运行：
+切换到 `data` 文件夹并运行：
 
 ```bash
 git remote set-url origin https://your_username:your_token@[你的仓库URL]

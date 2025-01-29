@@ -97,19 +97,17 @@ echo "Updating data..."
 python3 sort/upd.py
 mv ./diff.txt ./data/diff.txt
   cd ./data
-  git add --all
-  git commit -m "$(date +"%Y-%m-%d %H:%M:%S")"
+  git add --all > /dev/null
+  git commit -m "$(date +"%Y-%m-%d %H:%M:%S")" > /dev/null
   cd ..
 if [[ -s "info/tguserid.txt" ]] && [[ -s "info/tgapikey.txt" ]]; then
   echo "Pushing to your Telegram bot..."
   python3 tgbot.py
 fi
-
-if [[ -s "info/githubrepo.txt" ]]; then
+cd ./data
+if [[ -n $(git remote) ]]; then
   echo "Pushing to your GitHub repository..."
-  cd ./data
   git push --force
-  cd ..
 fi
-
+cd ..
 cat ./data/diff.txt
