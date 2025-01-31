@@ -1,6 +1,6 @@
 # Twitter FDAP
 
-A Linux script for exporting and checking the diff in your X/Twitter follower and following lists automatically.
+A Linux script for exporting and checking the diff in your X(Twitter) follower and following lists automatically.
 
 English | [简体中文](README.CN.md)
 
@@ -67,13 +67,13 @@ You must obtain an initial version of the follow list to use this script.
     Then run:
     
     ```bash
-    jq -c '.[]' ~/Downloads/twitter-Followers-*.json | while read -r item; do
+    jq -c '.[]' ./temp/twitter-Followers-*.json | while read -r item; do
       id=$(echo "$item" | jq -r '.id')
-      echo "$item" | jq . > "$source_dir/${id}.json"
+      echo "$item" | jq . > "./data/${id}.json"
     done
-    jq -c '.[]' ~/Downloads/twitter-Following-*.json | while read -r item; do
+    jq -c '.[]' ./temp/twitter-Following-*.json | while read -r item; do
       id=$(echo "$item" | jq -r '.id')
-      echo "$item" | jq . > "$source_dir/${id}.json"
+      echo "$item" | jq . > "./data/${id}.json"
     done
     ```
 

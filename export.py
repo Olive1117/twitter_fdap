@@ -2,7 +2,6 @@ import asyncio
 import websockets
 import json
 
-# Function to send JS code to the browser and receive the response
 async def send_js_code(uri, script):
     async with websockets.connect(uri) as websocket:
         js_code = {
@@ -14,26 +13,29 @@ async def send_js_code(uri, script):
         }
         await websocket.send(json.dumps(js_code))
         response = await websocket.recv()
-        return json.loads(response)  # Parse the response into JSON
+        return json.loads(response)
 
 async def main(uri):
-    # Execute the first command
     await send_js_code(uri, "document.querySelector('.btn.btn-sm.p-0.w-9.h-9').click();")
-    await asyncio.sleep(1)  # Wait for 1 second
+    await asyncio.sleep(1)
 
-    # First while True loop
     while True:
         response_followers = await send_js_code(
             uri,
             "parseInt(document.querySelector('div.mt-3.flex.items-center.gap-2').textContent.match(/of (\\d+) items/)[1]);"
         )
-        if response_followers["result"]["result"]["value"] != 0:
+        followers_count = (await send_js_code(uri, "parseInt(document.querySelector('.flex.flex-col.flex-grow .text-sm')?.innerText?.trim());")).get("result", {}).get("result", {}).get("value")
+        if followers_count == 0:
             break
-        await asyncio.sleep(0.5)
+        elif response_followers["result"]["result"]["value"] != 0:
+            break
+        await asyncio.sleep(1)
 
-    # Execute other commands
-    await send_js_code(uri, "document.querySelector('.checkbox').click();")
-    await asyncio.sleep(1)
+    checkbox_status = (await send_js_code(uri, "document.querySelector('.checkbox').checked"))["result"]["result"]["value"]
+
+    if checkbox_status == False:
+        await send_js_code(uri, "document.querySelector('.checkbox').click();")
+        await asyncio.sleep(1)
 
     await send_js_code(uri, "document.querySelector('.btn.btn-primary').click();")
     await asyncio.sleep(1)
@@ -41,23 +43,25 @@ async def main(uri):
     await send_js_code(uri, "document.querySelectorAll('.btn.btn-primary')[1].click();")
     await asyncio.sleep(1)
 
-    # Execute the next command
     await send_js_code(uri, "document.querySelectorAll('.btn.btn-sm.p-0.w-9.h-9')[1].click();")
     await asyncio.sleep(1)
 
-    # Second while True loop
     while True:
         response_following = await send_js_code(
             uri,
             "parseInt(document.querySelectorAll('div.mt-3.flex.items-center.gap-2')[1].textContent.match(/of (\\d+) items/)[1]);"
         )
-        if response_following["result"]["result"]["value"] != 0:
+        following_count = (await send_js_code(uri, "parseInt(document.querySelectorAll('.flex.flex-col.flex-grow .text-sm')[1].innerText.trim());")).get("result", {}).get("result", {}).get("value")
+        if following_count == 0:
             break
-        await asyncio.sleep(0.5)
+        elif response_following["result"]["result"]["value"] != 0:
+            break
+        await asyncio.sleep(1)
 
-    # Execute subsequent commands
-    await send_js_code(uri, "document.querySelectorAll('.checkbox')[12].click();")
-    await asyncio.sleep(1)
+    checkbox_status_following = (await send_js_code(uri, "document.querySelectorAll('.checkbox')[12].checked"))["result"]["result"]["value"]
+    if checkbox_status_following == False:
+        await send_js_code(uri, "document.querySelectorAll('.checkbox')[12].click();")
+        await asyncio.sleep(1)
 
     await send_js_code(uri, "document.querySelectorAll('.btn.btn-primary')[2].click();")
     await asyncio.sleep(1)

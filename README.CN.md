@@ -1,6 +1,6 @@
 # Twitter FDAP
 
-一个用于自动导出和检查你的 X/Twitter 关注者和正在关注列表差异的 Linux 脚本。
+一个用于自动导出和检查你的 X(Twitter) 关注者和正在关注列表差异的 Linux 脚本。
 
 [English](README.md) | 简体中文
 
@@ -55,17 +55,17 @@
 10. 使用相同方法导出"正在关注"列表
 
 11. 在脚本目录下运行以下命令：
-
+    
     ```bash
     cd data
     git config --global init.defaultBranch main
     git init
     ```
-
+    
     （或者在 GitHub 上创建仓库并运行 `git clone [你的仓库URL]`）
-
+    
     然后运行：
-
+    
     ```bash
     jq -c '.[]' ~/Downloads/twitter-Followers-*.json | while read -r item; do
       id=$(echo "$item" | jq -r '.id')
@@ -95,3 +95,4 @@
 
 ```bash
 git remote set-url origin https://your_username:your_token@[你的仓库URL]
+```

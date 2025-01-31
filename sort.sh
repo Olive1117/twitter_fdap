@@ -8,6 +8,7 @@ if [[ -f ./data/.json ]]; then
 fi
 source_dir="./temp/data"  # 源目录路径
 target_dir="./data"  # 目标目录路径
+mkdir -p $target_dir/removed
 
 # 清空所有txt文件
 > "$source_dir/mutual_unfollow.txt"
@@ -29,7 +30,9 @@ python3 sort/step2.py
 python3 sort/step3.py
 
 # Output Mutual Unfollow, Single Unfollower and Single Unfollowing lists
-echo "*Mutual Unfollow or removed:*" >> ./diff.txt
+if [ -s "$source_dir/mutual_unfollow.txt" ]; then
+  echo "*Mutual Unfollow or removed:*" >> ./diff.txt
+fi
 while IFS= read -r id; do
   target_file="$target_dir/$id.json"
 
@@ -42,9 +45,10 @@ while IFS= read -r id; do
   fi
 done < "$source_dir/mutual_unfollow.txt"
 
-echo "" >> ./diff.txt
-
-echo "*Single Unfollower:*" >> ./diff.txt
+if [ -s "$source_dir/single-unfollower.txt" ]; then
+  echo "" >> ./diff.txt
+  echo "*Single Unfollower:*" >> ./diff.txt
+fi
 while IFS= read -r id; do
   target_file="$target_dir/$id.json"
 
@@ -55,9 +59,10 @@ while IFS= read -r id; do
   fi
 done < "$source_dir/single-unfollower.txt"
 
-echo "" >> ./diff.txt
-
-echo "*Single Unfollowing:*" >> ./diff.txt
+if [ -s "$source_dir/single-unfollowing.txt" ]; then
+  echo "" >> ./diff.txt
+  echo "*Single Unfollowing:*" >> ./diff.txt
+fi
 while IFS= read -r id; do
   target_file="$target_dir/$id.json"
 
@@ -67,12 +72,16 @@ while IFS= read -r id; do
     echo "\`$name\` @\`$screen_name\`" >> ./diff.txt
   fi
 done < "$source_dir/single-unfollowing.txt"
-
-echo "" >> ./diff.txt
-
-echo "*Returners:*" >> ./diff.txt
-
-mapfile -t removed_list < ./data/removed_list.txt
+if [ -f "./data/removed_list.txt" ]; then
+  mapfile -t removed_list < ./data/removed_list.txt
+else
+  touch ./data/removed_list.txt
+  removed_list=()
+fi
+if [ ${#removed_list[@]} -ne 0 ]; then
+  echo "" >> ./diff.txt
+  echo "*Returners:*" >> ./diff.txt
+fi
 
 for source_file in "$source_dir"/*.json; do
   id=$(jq -r '.id' "$source_file")
