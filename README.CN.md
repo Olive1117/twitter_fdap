@@ -89,7 +89,7 @@
 
 在 `info/tguserid.txt` 中输入你的 Telegram 用户 ID（一个数字）。
 
-### 推送到 GitHub 仓库
+## 推送到 GitHub 仓库
 
 切换到 `data` 文件夹并运行：
 

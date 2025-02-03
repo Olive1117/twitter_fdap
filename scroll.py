@@ -78,17 +78,27 @@ async def check_page_content(uri, target_number):
         else:
             repeat = 0
         if real_target_number == value:
-            print(f"Progress: {value}/{real_target_number}({last_fetch})")
-            print("Success")
+            print(f"\rProgress: {value}/{real_target_number}", end='')
+            print("\nSuccess")
             if not args.following:
                 await send_js_code(uri, f"window.location.replace('https://x.com/{id_value}/following')")
             return True
-        button_check_response = await send_js_code(uri, "(() => document.querySelector('.css-175oi2r.r-sdzlij.r-1phboty.r-rs99b7.r-lrvibr.r-2yi16.r-1qi8awa.r-3pj75a.r-1loqt21.r-o7ynqc.r-6416eg.r-1ny4l3l') != null)();")
-        if button_check_response.get('result', {}).get('result', {}).get('value') and value == 0:
+        nofollow_check_response = await send_js_code(uri, "(() => document.querySelector('.css-146c3p1.r-bcqeeo.r-qvutc0.r-37j5jr.r-fdjqy7.r-1yjpyg1.r-ueyrd6.r-1vr29t4.r-5oul0u[data-testid=\"empty_state_header_text\"]') != null)();")
+        check_button_js_first = """
+                (() => {
+                        return document.querySelector('.css-175oi2r.r-sdzlij.r-1phboty.r-rs99b7.r-lrvibr.r-2yi16.r-1qi8awa.r-3pj75a.r-1loqt21.r-o7ynqc.r-6416eg.r-1ny4l3l') !== null;
+                    })();
+                """
+        button_exists_response_first = await send_js_code(uri, check_button_js_first)
+        if nofollow_check_response.get('result', {}).get('result', {}).get('value') and not button_exists_response_first.get('result', {}).get('result', {}).get('value') and value == 0:
             if args.following:
-                print("Success (You haven't followed anyone)")
+                print("\nSuccess (You haven't followed anyone)")
             else:
-                print("Success (You don't have any followers)")
+                print("\nSuccess (You don't have any followers)")
+                if not args.following:
+                    await send_js_code(uri, f"window.location.replace('https://x.com/{id_value}/following')")
+                    await send_js_code(uri, f"window.location.reload()")
+                    time.sleep(2)
             return True
         elif repeat >= 5:
             check_retry_button = """
@@ -105,16 +115,16 @@ async def check_page_content(uri, target_number):
             await asyncio.sleep(0.3)
             loading_response = await send_js_code(uri, check_loading)
             if retry_button_response.get('result', {}).get('result', {}).get('value') and loading_response.get('result', {}).get('result', {}).get('value'):
-                print("Success(inferred)")
+                print("\nSuccess(inferred)")
                 if not args.following:
                     await send_js_code(uri, f"window.location.replace('https://x.com/{id_value}/following')")
                 return True
             else:
                 repeat = 0
-                print(f"Progress: {value}/{real_target_number}({last_fetch})")
+                print(f"\rProgress: {value}/{real_target_number}", end='')
                 return False
         else:
-            print(f"Progress: {value}/{real_target_number}({last_fetch})")
+            print(f"\rProgress: {value}/{real_target_number}", end='')
             return False
         last_fetch = value
     except Exception as e:
@@ -134,7 +144,7 @@ async def scroll_page(uri, first_time):
                 button_exists_response = await send_js_code(uri, check_button_js)
                 button_exists = button_exists_response.get('result', {}).get('result', {}).get('value')
                 if button_exists:
-                    print("Looks like you've hit Twitter's rate limit. Retrying, this may take a while.")
+                    print("\nLooks like you've hit Twitter's rate limit. Retrying, this may take a while.")
                     for i in range(600, -1, -1):
                         print(f"\r{i:03}", end="", flush=True)
                         time.sleep(1)

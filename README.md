@@ -2,6 +2,8 @@
 
 A Linux script for exporting and checking the diff in your X(Twitter) follower and following lists automatically.
 
+FDAP = Followers Diff Auto Push
+
 English | [简体中文](README.CN.md)
 
 # Contact Me
@@ -89,7 +91,7 @@ Enter your Telegram bot API key in `info/tgapi.txt`.
 
 Enter your Telegram User ID (a number) in `info/tguserid.txt`.
 
-### Push to GitHub repository
+## Push to GitHub repository
 
  Change to the `data` folder and run:
 
