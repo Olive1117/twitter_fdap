@@ -15,12 +15,22 @@ for arg in "$@"; do
     download="${arg#--download=}"
   fi
 done
+
+if [[ "$@" == *"dd"* ]]; then
+    download="/home/akira/Downloads"
+fi
+
 if [[ -n "$download" ]]; then
   echo "Download directory set to $download"
+  if [[ -e $download/twitter-Follow*.json ]]; then
+    rm $download/twitter-Follow*.json
+  fi
 fi
 
 if [[ "$@" == *"link"* ]]; then
-    rm ./chromium-data
+    if [[ -e ./chromium-data ]];then
+      rm ./chromium-data
+    fi
     ln -s ~/.config/google-chrome ./chromium-data
 fi
 
