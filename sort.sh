@@ -40,7 +40,7 @@ python3 sort/step3.py
 
 # Output Mutual Unfollow, Single Unfollower and Single Unfollowing lists
 if [[ -s "$source_dir/mutual_unfollow.txt" ]]; then
-  echo "*Mutual Unfollow or removed:*" >> ./diff.txt
+  echo "*Mutual Unfollow or Removal:*" >> ./diff.txt
   while IFS= read -r id; do
     target_file="$target_dir/$id.json"
 
@@ -131,6 +131,7 @@ if [[ -n $(git remote) ]]; then
   git push --force
 fi
 cd ..
+sleep 0.5
 echo "-----BEGIN DIFF.TXT-----"
 cat "$target_dir/diff.txt"
 echo "-----END DIFF.TXT-----"

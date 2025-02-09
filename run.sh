@@ -33,6 +33,12 @@ if [[ -n "$download" ]]; then
   rm -f $download/twitter-Follow*.json
 fi
 
+echo "Checking the environment..."
+bash ./checkenv.sh
+if [[ $(cat ./temp/checkenv-status.txt) == "1" ]]; then
+    exit 1
+fi
+
 if [[ "$@" == *"link"* ]]; then
     if [[ -e ./chromium-data ]];then
       rm ./chromium-data
@@ -90,8 +96,9 @@ done
 python3 ./open.py
 echo "Waiting..."
 sleep 3
-if [[ "$(curl -s http://localhost:9222/json | jq -r ".[] | select(.webSocketDebuggerUrl == \"$(cat ./temp/debug_url.txt | tr -d '\n')\") | .url")" != "https://x.com/$(cat info/id.txt)/followers" ]]; then
+if [[ "$(curl -s http://127.0.0.1:9222/json | jq -r ".[] | select(.webSocketDebuggerUrl == \"$(cat ./temp/debug_url.txt | tr -d '\n')\") | .url")" != "https://x.com/$(cat info/id.txt)/followers" ]]; then
   echo "You haven't signed in to your Twitter account."
+  pkill -f chrom
   exit 1
 fi
 echo "Fetching your followers list..."

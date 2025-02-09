@@ -1,9 +1,6 @@
 import asyncio
-import nest_asyncio
 from telegram import Bot
 from telegram.constants import ParseMode
-
-nest_asyncio.apply()
 
 def get_token_and_user_id():
     with open('./info/tgapikey.txt', 'r') as token_file:
@@ -12,17 +9,13 @@ def get_token_and_user_id():
         user_id = int(user_id_file.read().strip())
     return token, user_id
 
-TOKEN, USER_ID = get_token_and_user_id()
-
-bot = Bot(token=TOKEN)
-
-async def send_file_content():
+async def send_file_content(bot, user_id):
     try:
         with open('./data/diff.txt', 'r') as file:
             content = file.read()
 
         await bot.send_message(
-            chat_id=USER_ID,
+            chat_id=user_id,
             text=content,
             parse_mode=ParseMode.MARKDOWN
         )
@@ -30,8 +23,10 @@ async def send_file_content():
     except Exception as e:
         print(f"Error: {e}")
 
-def main():
-    asyncio.run(send_file_content())
+async def main():
+    token, user_id = get_token_and_user_id()
+    bot = Bot(token=token)
+    await send_file_content(bot, user_id)
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())

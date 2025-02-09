@@ -16,14 +16,13 @@
 
 # 环境要求
 
-- Linux 计算机
-- Python3 及 websockets 模块
+- GNU/Linux 操作系统
+- Python3 和 pip3
 - 安装了 Tampermonkey 的 Google Chrome
 - 在 Google Chrome 中登录你的 Twitter 账号
 - 在 Tampermonkey 中安装并启用 [twitter-web-exporter](https://github.com/prinsss/twitter-web-exporter) v1.2.0（注意：请使用本 FDAP 脚本中我修改过的 `twitter-web-exporter.js`）
-- 展开 twitter-web-exporter 中的菜单
 - 端口 9992 可用
-- 已安装 7-zip、jq(1.7.1)、xterm 和 git
+- jq 版本 1.7.1
 - 在 `id.txt` 中输入你的 Twitter ID
 
 # 使用方法
@@ -36,25 +35,31 @@
 
 1. 切换到脚本所在目录
 
-2. 使用 `--user-data-dir=./chromium-data` 参数启动 Google Chrome
+2. 运行`pip3 install ./requirements.txt`
 
-3. 安装 tampermonkey 和我修改过的 twitter-web-exporter
+3. 使用 `--user-data-dir=./chromium-data` 参数启动 Google Chrome
 
-4. 将下载目录设置为 `./temp`
+4. 安装 tampermonkey 和我修改过的 twitter-web-exporter
 
-5. 登录你的 Twitter 账号并访问 [https://x.com/[你的Twitter-ID]/followers/](https://x.com/%5B你的Twitter-ID%5D/followers/)
+5. 将下载目录设置为 `./temp`
 
-6. 允许 `x.com` 的弹窗和自动下载
+6. 登录你的 Twitter 账号并访问 [https://x.com/[你的Twitter-ID]/followers/](https://x.com/%5B你的Twitter-ID%5D/followers/)
 
-7. 滚动到列表底部
+7. 允许 `x.com` 的pop-ups权限
 
-8. 点击左侧的猫咪图标展开菜单
+8. 滚动到列表底部
 
-9. 点击相应行的箭头，勾选顶部复选框，然后点击 `Export Data` 再点击 `Start Export`
+9. 点击左侧的猫咪图标展开菜单
 
-10. 使用相同方法导出"正在关注"列表
+10. 点击相应行的箭头，勾选顶部复选框，然后点击 `Export Data` 再点击 `Start Export`
 
-11. 在脚本目录下运行以下命令：
+11. 使用相同方法导出"正在关注"列表
+
+12. 频繁点击`Start Export`来触发Chrome询问是否允许多次下载的弹窗，然后点击允许
+
+13. 删除多余的文件
+
+14. 在脚本目录下运行以下命令：
     
     ```bash
     cd data
@@ -62,20 +67,22 @@
     git init
     ```
     
-    （或者在 GitHub 上创建仓库并运行 `git clone [你的仓库URL]`）
+    （或者在 GitHub 上创建仓库并运行 `git clone [Your repository URL]`）
     
     然后运行：
     
     ```bash
-    jq -c '.[]' ~/Downloads/twitter-Followers-*.json | while read -r item; do
+    jq -c '.[]' ./temp/twitter-Followers-*.json | while read -r item; do
       id=$(echo "$item" | jq -r '.id')
-      echo "$item" | jq . > "$source_dir/${id}.json"
+      echo "$item" | jq . > "./data/${id}.json"
     done
-    jq -c '.[]' ~/Downloads/twitter-Following-*.json | while read -r item; do
+    jq -c '.[]' ./temp/twitter-Following-*.json | while read -r item; do
       id=$(echo "$item" | jq -r '.id')
-      echo "$item" | jq . > "$source_dir/${id}.json"
+      echo "$item" | jq . > "./data/${id}.json"
     done
     ```
+
+15. 在`info/acknowledgment.txt`中输入`I have followed the above steps`
 
 # 配置
 
@@ -94,5 +101,9 @@
 切换到 `data` 文件夹并运行：
 
 ```bash
-git remote set-url origin https://your_username:your_token@[你的仓库URL]
+git remote set-url origin https://your_username:your_token@[Your repository URL]
 ```
+
+# 视频教程
+
+https://youtu.be/RRp5NUd1Jrg

@@ -1,7 +1,6 @@
 import asyncio
 import websockets
 import json
-import time
 import os
 import sys
 
@@ -31,7 +30,7 @@ async def monitor_page_cleardb(uri):
 }
 '''
     await send_js_code(uri, js_code_cleardb)
-    time.sleep(0.1)
+    await asyncio.sleep(0.1)
 
 async def monitor_page_er(uri):
     js_code_er = '''if (!window.scriptElement) {
@@ -53,8 +52,11 @@ async def monitor_page_er(uri):
         with open('./temp/target_number-1.txt', 'w') as file:
             file.write(str(response_er))
     else:
-        time.sleep(0.1)
-        os.execv(sys.executable, ['python'] + sys.argv)
+        await asyncio.sleep(0.1)
+        # 重启脚本：使用 os.execv 替换当前进程，避免嵌套事件循环
+        os.execv(sys.executable, [sys.executable] + sys.argv)
+        # 如果 execv 成功执行，后面的代码不会运行
+        raise SystemExit
 
 async def monitor_page_ing(uri):
     js_code_ing = '''if (!window.scriptElement) {
@@ -76,8 +78,9 @@ async def monitor_page_ing(uri):
         with open('./temp/target_number-2.txt', 'w') as file:
             file.write(str(response_ing))
     else:
-        time.sleep(0.1)
-        os.execv(sys.executable, ['python'] + sys.argv)
+        await asyncio.sleep(0.1)
+        os.execv(sys.executable, [sys.executable] + sys.argv)
+        raise SystemExit
 
 async def main():
     with open('./temp/debug_url.txt', 'r') as file:

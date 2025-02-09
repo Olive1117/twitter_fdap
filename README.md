@@ -18,14 +18,13 @@ The script is intended for my personal use. It may cause bugs or errors when run
 
 # Requirements
 
-- A Linux computer
-- Python3 with the websockets module
+- GNU/Linux Operating System
+- Python3 and pip3
 - Google Chrome with Tampermonkey installed
 - Signed in to your Twitter account in Google Chrome
 - Install and enable [twitter-web-exporter](https://github.com/prinsss/twitter-web-exporter) v1.2.0 in Tampermonkey (Note: Please use my modified `twitter-web-exporter.js` in this FDAP script)
-- Expand the menu in twitter-web-exporter
 - Port 9992 should be available
-- 7-zip, jq(1.7.1), xterm, and git installed
+- jq version 1.7.1
 - Enter your Twitter ID in `id.txt`
 
 # Usage
@@ -38,25 +37,31 @@ You must obtain an initial version of the follow list to use this script.
 
 1. Change your dir to the script
 
-2. Start Google Chrome with `--user-data-dir=./chromium-data`
+2. Run `pip3 install -r ./requirements.txt`
 
-3. Install tampermonkey and my modified twitter-web-exporter
+3. Start Google Chrome with `--user-data-dir=./chromium-data`
 
-4. Set the download dictionary to `./temp`
+4. Install tampermonkey and my modified twitter-web-exporter
 
-5. Sign in your Twitter Account and visit [https://x.com/[Your-Twitter-ID]/followers/](https://x.com/%5BYour-Twitter-ID%5D/followers/)
+5. Set the download dictionary to `./temp`
 
-6. Allow `x.com` pop-ups and Automatic downloads
+6. Sign in your Twitter Account and visit [https://x.com/[Your-Twitter-ID]/followers/](https://x.com/%5BYour-Twitter-ID%5D/followers/)
 
-7. Scroll to the bottom of the list.
+7. Allow `x.com` pop-ups
 
-8. Click the cat icon on the left to expand the menu.
+8. Scroll to the bottom of the list.
 
-9. Click the arrowhead in the corresponding row, check the checkbox at the top, and click `Export Data` then `Start Export`.
+9. Click the cat icon on the left to expand the menu.
 
-10. Use the same method to export the 'following' list.
+10. Click the arrowhead in the corresponding row, check the checkbox at the top, and click `Export Data` then `Start Export`.
 
-11. Run the following commands in the directory of this script:
+11. Use the same method to export the 'following' list.
+
+12. Press the `Start Export` button quickly to trigger the notification requesting permission for multiple downloads, then click 'Allow'.
+
+13. Delete the extra files.
+
+14. Run the following commands in the directory of this script:
     
     ```bash
     cd data
@@ -79,6 +84,8 @@ You must obtain an initial version of the follow list to use this script.
     done
     ```
 
+15. Enter `I have followed the above steps` into `info/acknowledgment.txt`.
+
 # Configuration
 
 Create a folder `info`
@@ -98,3 +105,7 @@ Enter your Telegram User ID (a number) in `info/tguserid.txt`.
 ```bash
 git remote set-url origin https://your_username:your_token@[Your repo URL]
 ```
+
+# Video Guide
+
+https://youtu.be/RRp5NUd1Jrg
