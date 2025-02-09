@@ -74,23 +74,23 @@ async def check_page_content(uri, target_number):
 
         if last_fetch == value:
             repeat += 1
-            print(f"Repeat: {repeat}")
         else:
             repeat = 0
         if real_target_number == value:
+            print(f"\r{' ' * 50}", end='')
             print(f"\rProgress: {value}/{real_target_number}", end='')
             print("\nSuccess")
             if not args.following:
                 await send_js_code(uri, f"window.location.replace('https://x.com/{id_value}/following')")
             return True
-        nofollow_check_response = await send_js_code(uri, "(() => document.querySelector('.css-146c3p1.r-bcqeeo.r-qvutc0.r-37j5jr.r-fdjqy7.r-1yjpyg1.r-ueyrd6.r-1vr29t4.r-5oul0u[data-testid=\"empty_state_header_text\"]') != null)();")
-        check_button_js_first = """
-                (() => {
-                        return document.querySelector('.css-175oi2r.r-sdzlij.r-1phboty.r-rs99b7.r-lrvibr.r-2yi16.r-1qi8awa.r-3pj75a.r-1loqt21.r-o7ynqc.r-6416eg.r-1ny4l3l') !== null;
-                    })();
+        is_nofollow = await send_js_code(uri, "(() => document.querySelector('.css-175oi2r.r-1kihuf0.r-19jyx45.r-f8sm7e.r-1uwfxku.r-qq1thf.r-13qz1uu[data-testid=\"emptyState\"]') != null)();")
+        check_retry_button_js_first = """
+                    (() => {
+                            return document.querySelector('.css-175oi2r.r-sdzlij.r-1phboty.r-rs99b7.r-lrvibr.r-1ii58gl.r-25kp3t.r-ubg91z.r-1loqt21.r-o7ynqc.r-6416eg.r-1ny4l3l') !== null;
+                        })();
                 """
-        button_exists_response_first = await send_js_code(uri, check_button_js_first)
-        if nofollow_check_response.get('result', {}).get('result', {}).get('value') and not button_exists_response_first.get('result', {}).get('result', {}).get('value') and value == 0:
+        button_exists_response_first = await send_js_code(uri, check_retry_button_js_first)
+        if is_nofollow.get('result', {}).get('result', {}).get('value') and not button_exists_response_first.get('result', {}).get('result', {}).get('value') and value == 0:
             if args.following:
                 print("\nSuccess (You haven't followed anyone)")
             else:
@@ -106,25 +106,30 @@ async def check_page_content(uri, target_number):
                     return document.querySelector('.css-175oi2r.r-sdzlij.r-1phboty.r-rs99b7.r-lrvibr.r-2yi16.r-1qi8awa.r-3pj75a.r-1loqt21.r-o7ynqc.r-6416eg.r-1ny4l3l') == null;
                 })();
             """
-            check_loading = """
+            check_loading_circle = """
             (() => {
                     return document.querySelector('div[role="progressbar"][aria-valuemax="1"][aria-valuemin="0"].css-175oi2r.r-1awozwy.r-1777fci') == null;
                 })();
             """
             retry_button_response = await send_js_code(uri, check_retry_button)
             await asyncio.sleep(0.3)
-            loading_response = await send_js_code(uri, check_loading)
+            loading_response = await send_js_code(uri, check_loading_circle)
             if retry_button_response.get('result', {}).get('result', {}).get('value') and loading_response.get('result', {}).get('result', {}).get('value'):
                 print("\nSuccess(inferred)")
                 if not args.following:
                     await send_js_code(uri, f"window.location.replace('https://x.com/{id_value}/following')")
                 return True
             else:
-                repeat = 0
-                print(f"\rProgress: {value}/{real_target_number}", end='')
+                print(f"\r{' ' * 50}", end='')
+                print(f"\rProgress: {value}/{real_target_number} (Repeat: {repeat})", end='')
                 return False
         else:
-            print(f"\rProgress: {value}/{real_target_number}", end='')
+            if repeat == 0:
+                print(f"\r{' ' * 50}", end='')
+                print(f"\rProgress: {value}/{real_target_number}", end='')
+            else:
+                print(f"\r{' ' * 50}", end='')
+                print(f"\rProgress: {value}/{real_target_number} (Repeat: {repeat})", end='')
             return False
         last_fetch = value
     except Exception as e:
@@ -136,19 +141,20 @@ async def scroll_page(uri, first_time):
         async with websockets.connect(uri) as websocket:
             for _ in range(5):
                 await send_js_code(uri, "window.scrollBy(0, window.innerHeight * 6);")
-                check_button_js = """
+                check_retry_button_js = """
                 (() => {
-                        return document.querySelector('.css-175oi2r.r-sdzlij.r-1phboty.r-rs99b7.r-lrvibr.r-2yi16.r-1qi8awa.r-3pj75a.r-1loqt21.r-o7ynqc.r-6416eg.r-1ny4l3l') !== null;
+                        return document.querySelector('.css-175oi2r.r-sdzlij.r-1phboty.r-rs99b7.r-lrvibr.r-1ii58gl.r-25kp3t.r-ubg91z.r-1loqt21.r-o7ynqc.r-6416eg.r-1ny4l3l') !== null;
                     })();
                 """
-                button_exists_response = await send_js_code(uri, check_button_js)
+                button_exists_response = await send_js_code(uri, check_retry_button_js)
                 button_exists = button_exists_response.get('result', {}).get('result', {}).get('value')
                 if button_exists:
                     print("\nLooks like you've hit Twitter's rate limit. Retrying, this may take a while.")
                     for i in range(600, -1, -1):
-                        print(f"\r{i:03}", end="", flush=True)
+                        print(f"\r{' ' * 50}", end='')
+                        print(f"\r{i}", end="", flush=True)
                         time.sleep(1)
-                    await send_js_code(uri, "document.querySelector('.css-175oi2r.r-4d76ec').querySelector('button').click();")
+                    await send_js_code(uri, "document.querySelector('button.css-175oi2r.r-sdzlij.r-1phboty.r-rs99b7.r-lrvibr.r-1ii58gl.r-25kp3t.r-ubg91z.r-1loqt21.r-o7ynqc.r-6416eg.r-1ny4l3l').click();")
                 await asyncio.sleep(0.2)
             js_code = """
                 Array.from(document.querySelectorAll('.text-sm.text-base-content.leading-5.text-opacity-70.m-0'))

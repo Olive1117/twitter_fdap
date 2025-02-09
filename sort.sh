@@ -131,4 +131,6 @@ if [[ -n $(git remote) ]]; then
   git push --force
 fi
 cd ..
+echo "-----BEGIN DIFF.TXT-----"
 cat "$target_dir/diff.txt"
+echo "-----END DIFF.TXT-----"

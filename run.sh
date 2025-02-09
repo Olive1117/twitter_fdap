@@ -8,6 +8,7 @@ rm -rf ./temp/*
 #pkill -f vncserver
 figlet -k -W "FDAP"
 echo 'https://github.com/MtFloveU/twitter_fdap'
+echo "Contant me on Twitter @Ak1raQ_love"
 echo ' '
 
 for arg in "$@"; do
@@ -20,18 +21,25 @@ if [[ "$@" == *"dd"* ]]; then
     download="/home/akira/Downloads"
 fi
 
+for arg in "$@"; do
+  if [[ "$arg" == --username=* ]]; then
+    echo "${arg#--username=}" > ./info/id.txt
+    echo "Username change to "$(cat ./info/id.txt)
+  fi
+done
+
 if [[ -n "$download" ]]; then
   echo "Download directory set to $download"
-  if [[ -e $download/twitter-Follow*.json ]]; then
-    rm $download/twitter-Follow*.json
-  fi
+  rm -f $download/twitter-Follow*.json
 fi
 
 if [[ "$@" == *"link"* ]]; then
     if [[ -e ./chromium-data ]];then
       rm ./chromium-data
+      sleep 1
     fi
     ln -s ~/.config/google-chrome ./chromium-data
+    sleep 1
 fi
 
 if [[ "$@" == *"kill"* ]]; then
@@ -72,20 +80,29 @@ while true; do
         break
     fi
     python3 ./get_followers_count.py
+    if [[ "$@" == *"custom-count"* ]]; then
+      read -p "Enter your Followers and Following count in order, separated by space: " num1 num2
+      echo "$num1" > ./temp/target_number-1.txt
+      echo "$num2" > ./temp/target_number-2.txt
+    fi
     sleep 0.5
 done
 python3 ./open.py
 echo "Waiting..."
 sleep 3
+if [[ "$(curl -s http://localhost:9222/json | jq -r ".[] | select(.webSocketDebuggerUrl == \"$(cat ./temp/debug_url.txt | tr -d '\n')\") | .url")" != "https://x.com/$(cat info/id.txt)/followers" ]]; then
+  echo "You haven't signed in to your Twitter account."
+  exit 1
+fi
 echo "Fetching your followers list..."
 
 while [ ! -f ./temp/fetched-followers.txt ] || [ "$(cat ./temp/fetched-followers.txt)" != "1" ]; do
-    python3 ./scroll.py
+    python3 ./fetch.py
 done
 
 echo "Fetching your following list..."
 while [ ! -f ./temp/fetched-following.txt ] || [ "$(cat ./temp/fetched-following.txt)" != "1" ]; do
-    python3 ./scroll.py --following
+    python3 ./fetch.py --following
 done
 sleep 2
 echo "Exporting..."
@@ -102,7 +119,6 @@ rm -rf ./temp/*
 #pkill -f cpulimit
 #pkill -f vncserver
 #pkill -f tigervnc
-echo "Contant me on Twitter @Ak1raQ_love"
 if [[ "$@" == *"link"* ]]; then
     rm ./chromium-data
 fi
