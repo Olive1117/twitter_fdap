@@ -102,6 +102,8 @@ You must obtain an initial version of the follow list to use this script.
 
 - `--username=[username]`: Change the Twitter username.
 
+- `--proxychains`: Traffic network under Proxychains (Can also be used in sort.sh)
+
 ### sort.sh
 
 - `--disable-git-push`: Temporarily disable pushing to the remote Git repository.

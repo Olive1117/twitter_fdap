@@ -1,10 +1,14 @@
 import os
 import json
 import shutil
+import argparse
 
 source_dir = "./temp/data"
-target_dir = "./data"
-removed_list_path = "./data/removed_list.txt"
+parser = argparse.ArgumentParser()
+parser.add_argument("--target-dir", type=str, required=True)
+args = parser.parse_args()
+target_dir = args.target_dir
+removed_list_path = f"{target_dir}/removed_list.txt"
 
 def json_data(file_path):
     with open(file_path, 'r') as file:

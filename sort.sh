@@ -1,12 +1,21 @@
 #!/bin/bash
+username=$(cat info/id.txt)
 source_dir="./temp/data"
-target_dir="./data"
+target_dir="./data/$username"
+origin_dir=$(realpath .)
 mkdir -p "$source_dir"
-mkdir -p "$target_dir"
 
-if [[ ! -d "$target_dir/.git" ]]; then
+if [[ ! -d "$(dirname $(realpath $target_dir))/.git" ]]; then
   echo "The data directory is not a Git repository. Initializing..."
   git init $target_dir
+fi
+
+if [[ ! -e $target_dir && -e $(dirname $(realpath $target_dir)) ]]; then
+  echo "Upgrading to a newer version of the FDAP database..."
+  mkdir -p "$target_dir"
+  mv -f $(dirname $(realpath $target_dir))/*.json "$target_dir"
+  mv -f $(dirname $(realpath $target_dir))/*.txt "$target_dir"
+  mv -f $(dirname $(realpath $target_dir))/removed "$target_dir"/removed
 fi
 
 if [[ -n $(ls -A "$source_dir") ]]; then
@@ -27,19 +36,20 @@ mkdir -p "$target_dir/removed"
 > "$source_dir/single-unfollower.txt"
 > "$source_dir/single-unfollowing.txt"
 echo "Processing JSON files, this may take a while..."
-python3 sort/split.py
+python3 sort/split.py --target_dir=$target_dir
 
 echo "🕒Time: \`$(date +"%Y-%m-%d %H:%M:%S") $(date +%Z)\`" > ./diff.txt
+echo "Username: @\`"$username"\`" >> ./diff.txt
 echo '*'$(jq 'length' ./temp/twitter-Following*.json)' Following, '$(jq 'length' ./temp/twitter-Followers*.json)' Followers*' >> ./diff.txt
 
 # Step 1: Checking for mutual unfollow
-python3 sort/step1.py
+python3 sort/step1.py --target-dir $target_dir
 
 # Step 2: Checking followed_by status
-python3 sort/step2.py
+python3 sort/step2.py --target-dir $target_dir
 
 # Step 3: Checking following status
-python3 sort/step3.py
+python3 sort/step3.py --target-dir $target_dir
 
 # Output Mutual Unfollow, Single Unfollower and Single Unfollowing lists
 if [[ -s "$source_dir/mutual_unfollow.txt" ]]; then
@@ -94,7 +104,7 @@ while read -r id; do
   fi
 done < "$target_dir/single-unfollower.txt"
 
-python3 sort/step4.py
+python3 sort/step4.py --target-dir $target_dir
 
 if [[ -f "$target_dir/removed_list.txt" ]]; then
   mapfile -t removed_list < "$target_dir/removed_list.txt"
@@ -132,7 +142,7 @@ if [[ -f "$source_file" ]]; then
 fi
 
 if [[ -s "$source_dir/returners.txt" || -s "$source_dir/single-unfollower-returner-name.txt" ]]; then
-  echo "*Returning followers:*" >> ./diff.txt
+  echo "*Returning Follows:*" >> ./diff.txt
 
   if [[ -s "$source_dir/returners.txt" ]]; then
     cat "$source_dir/returners.txt" >> ./diff.txt
@@ -160,26 +170,35 @@ cat "$source_dir/single-unfollower.txt" >> "$target_dir/single-unfollower.txt"
 sort -u "$target_dir/single-unfollower.txt" | grep -v '^\s*$' > "$target_dir/single-unfollower_temp.txt"
 mv "$target_dir/single-unfollower_temp.txt" "$target_dir/single-unfollower.txt"
 
-python3 sort/upd.py
-mv ./diff.txt "$target_dir/diff.txt"
+python3 sort/upd.py --target-dir $target_dir
+cp ./diff.txt "$target_dir/diff.txt"
 cd "$target_dir"
 git add --all > /dev/null
 git commit -m "$(date +"%Y-%m-%d %H:%M:%S")" > /dev/null
-cd ..
+cd $origin_dir
 if [[ ! "$@" == *"disable-tg-push"* ]]; then
   if [[ -s "info/tguserid.txt" ]] && [[ -s "info/tgapikey.txt" ]]; then
     echo "Pushing to your Telegram bot..."
-    python3 tgbot.py
+    if [[ "$@" == *"proxychains"* ]]; then
+      proxychains python3 tgbot.py
+    else
+      python3 tgbot.py
+    fi
+    rm ./diff.txt
   fi
 fi
 cd "$target_dir"
 if [[ ! "$@" == *"disable-git-push"* ]]; then
   if [[ -n $(git remote) ]]; then
     echo "Pushing to your GitHub repository..."
-    git push --force
+    if [[ "$@" == *"proxychains"* ]]; then
+      proxychains git push --force
+    else
+      git push --force
+    fi
   fi
 fi
-cd ..
+cd $origin_dir
 sleep 0.5
 echo "-----BEGIN DIFF.TXT-----"
 cat "$target_dir/diff.txt"

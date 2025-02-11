@@ -1,8 +1,12 @@
 import os
 import json
+import argparse
 
 source_dir = "./temp/data"
-target_dir = "./data"
+parser = argparse.ArgumentParser()
+parser.add_argument("--target-dir", type=str, required=True)
+args = parser.parse_args()
+target_dir = args.target_dir
 single_unfollower_path = os.path.join(source_dir, "single-unfollower-return.txt")
 unfollower_txt_path = os.path.join(target_dir, "single-unfollower.txt")
 

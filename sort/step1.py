@@ -1,8 +1,12 @@
 import os
 import json
+import argparse
 
 source_dir = "./temp/data"
-target_dir = "./data"
+parser = argparse.ArgumentParser()
+parser.add_argument("--target-dir", type=str, required=True)
+args = parser.parse_args()
+target_dir = args.target_dir
 mutual_unfollow_path = os.path.join(source_dir, "mutual_unfollow.txt")
 
 with open(mutual_unfollow_path, 'w') as mutual_unfollow_file:

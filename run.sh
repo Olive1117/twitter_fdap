@@ -24,7 +24,6 @@ fi
 for arg in "$@"; do
   if [[ "$arg" == --username=* ]]; then
     echo "${arg#--username=}" > ./info/id.txt
-    echo "Username change to "$(cat ./info/id.txt)
   fi
 done
 
@@ -62,6 +61,8 @@ if [[ ! -f "./info/id.txt" ]] || [[ ! -s "./info/id.txt" ]]; then
   read -p "Enter your Twitter username (without '@'): " input
   echo $input > ./info/id.txt
 fi
+
+echo "Current username: "$(cat ./info/id.txt)
 
 if [[ ! -e "./chromium-data" ]]; then
   echo "The chromium-data directory does not exist. Check the README file for more details."
@@ -121,7 +122,11 @@ if [[ -n "$download" ]]; then
   cp $download/twitter-Followers*.json ./temp
   cp $download/twitter-Following*.json ./temp
 fi
+if [[ "$@" == *"proxychains"* ]]; then
+  ./sort.sh --proxychains
+else
   ./sort.sh
+fi
 rm -rf ./temp/*
 #pkill -f cpulimit
 #pkill -f vncserver
