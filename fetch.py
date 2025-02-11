@@ -83,7 +83,7 @@ async def check_page_content(uri, target_number):
             if not args.following:
                 await send_js_code(uri, f"window.location.replace('https://x.com/{id_value}/following')")
             return True
-        is_nofollow = await send_js_code(uri, "(() => document.querySelector('.css-175oi2r.r-1kihuf0.r-19jyx45.r-f8sm7e.r-1uwfxku.r-qq1thf.r-13qz1uu[data-testid=\"emptyState\"]') != null)();")
+        is_nofollow = await send_js_code(uri, "(() => document.querySelector('.css-175oi2r.r-1kihuf0[data-testid=\"emptyState\"]') != null)();")
         check_retry_button_js_first = """
                     (() => {
                             return document.querySelector('.css-175oi2r.r-sdzlij.r-1phboty.r-rs99b7.r-lrvibr.r-1ii58gl.r-25kp3t.r-ubg91z.r-1loqt21.r-o7ynqc.r-6416eg.r-1ny4l3l') !== null;

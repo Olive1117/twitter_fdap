@@ -1,6 +1,6 @@
 # Twitter FDAP
 
-A Linux script for exporting and checking the diff in your X(Twitter) follower and following lists automatically.
+A Linux script for exporting and checking the diff in your X(Twitter) followers and following list automatically.
 
 FDAP = Followers Diff Auto Push
 
@@ -20,12 +20,9 @@ The script is intended for my personal use. It may cause bugs or errors when run
 
 - GNU/Linux Operating System
 - Python3 and pip3
-- Google Chrome with Tampermonkey installed
-- Signed in to your Twitter account in Google Chrome
-- Install and enable [twitter-web-exporter](https://github.com/prinsss/twitter-web-exporter) v1.2.0 in Tampermonkey (Note: Please use my modified `twitter-web-exporter.js` in this FDAP script)
+- Google Chrome
 - Port 9992 should be available
 - jq version 1.7.1
-- Enter your Twitter ID in `id.txt`
 
 # Usage
 
@@ -57,7 +54,7 @@ You must obtain an initial version of the follow list to use this script.
 
 11. Use the same method to export the 'following' list.
 
-12. Press the `Start Export` button quickly to trigger the notification requesting permission for multiple downloads, then click 'Allow'.
+12. Press the `Start Export` button quickly to trigger the notification requesting permission for multiple downloads, then click `Allow`.
 
 13. Delete the extra files.
 
@@ -67,6 +64,7 @@ You must obtain an initial version of the follow list to use this script.
     cd data
     git config --global init.defaultBranch main
     git init
+    cd ..
     ```
     
     (Alternatively, create a repository on GitHub and run `git clone [Your repo URL]`)
@@ -85,6 +83,30 @@ You must obtain an initial version of the follow list to use this script.
     ```
 
 15. Enter `I have followed the above steps` into `info/acknowledgment.txt`.
+
+## Parameters
+
+**These parameters are for more convenient development just for me. Use them after making a judgment.**
+
+### run.sh
+
+- `--link`: Create a symbolic link from chromium-data to ~/.config/google-chrome. This parameter makes it possible to use your usual Chrome data, but improper operation may lead to data loss.
+
+- `--download=[path]`: Specify the download folder.
+
+- `--dd`: Set the download folder to ~/Downloads.
+
+- `--kill`: Kill Google Chrome before running.
+
+- `--custom-count`: Customize the target numbers.
+
+- `--username=[username]`: Change the Twitter username.
+
+### sort.sh
+
+- `--disable-git-push`: Temporarily disable pushing to the remote Git repository.
+
+- `--disable-tg-push`: Temporarily disable pushing to the Telegram bot.
 
 # Configuration
 

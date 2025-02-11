@@ -17,9 +17,12 @@ if [[ -f "$target_dir/.json" ]]; then
   rm "$target_dir/.json"
 fi
 
+if [[ ! -f "$target_dir/single-unfollower.txt" ]]; then
+  touch $target_dir/single-unfollower.txt
+fi
+
 mkdir -p "$target_dir/removed"
 
-# 清空所有txt文件
 > "$source_dir/mutual_unfollow.txt"
 > "$source_dir/single-unfollower.txt"
 > "$source_dir/single-unfollowing.txt"
@@ -56,7 +59,7 @@ if [[ -s "$source_dir/mutual_unfollow.txt" ]]; then
 fi
 
 if [[ -s "$source_dir/single-unfollower.txt" ]]; then
-  echo "*Single Unfollower:*" >> ./diff.txt
+  echo "*One-Way Unfollowers:*" >> ./diff.txt
   while IFS= read -r id; do
     target_file="$target_dir/$id.json"
 
@@ -70,7 +73,7 @@ if [[ -s "$source_dir/single-unfollower.txt" ]]; then
 fi
 
 if [[ -s "$source_dir/single-unfollowing.txt" ]]; then
-  echo "*Single Unfollowing:*" >> ./diff.txt
+  echo "*One-Way Unfollowing:*" >> ./diff.txt
   while IFS= read -r id; do
     target_file="$target_dir/$id.json"
 
@@ -82,6 +85,16 @@ if [[ -s "$source_dir/single-unfollowing.txt" ]]; then
   done < "$source_dir/single-unfollowing.txt"
   echo "" >> ./diff.txt
 fi
+
+while read -r id; do
+  if grep -q "^$id$" "$source_dir/mutual_unfollow.txt"; then
+    sed -i "/^$id$/d" "$target_dir/single-unfollower.txt"
+    sort -u "$target_dir/single-unfollower.txt" | grep -v '^\s*$' > "$target_dir/single-unfollower_temp.txt"
+    mv "$target_dir/single-unfollower_temp.txt" "$target_dir/single-unfollower.txt"
+  fi
+done < "$target_dir/single-unfollower.txt"
+
+python3 sort/step4.py
 
 if [[ -f "$target_dir/removed_list.txt" ]]; then
   mapfile -t removed_list < "$target_dir/removed_list.txt"
@@ -106,29 +119,65 @@ for source_file in "$source_dir"/*.json; do
   fi
 done
 
-if [[ -s "$source_dir/returners.txt" ]]; then
-  echo "*Returners:*" >> ./diff.txt
-  cat "$source_dir/returners.txt" >> ./diff.txt
+if [[ -s "$source_dir/single-unfollower-return.txt" ]]; then
+    while IFS= read -r id; do
+    source_file="$source_dir/$id.json"
+
+if [[ -f "$source_file" ]]; then
+      name=$(jq -r '.name' "$source_file")
+      screen_name=$(jq -r '.screen_name' "$source_file")
+      echo "\`$name\` @\`$screen_name\`" >> "$source_dir/single-unfollower-returner-name.txt"
+    fi
+  done < "$source_dir/single-unfollower-return.txt"
 fi
+
+if [[ -s "$source_dir/returners.txt" || -s "$source_dir/single-unfollower-returner-name.txt" ]]; then
+  echo "*Returning followers:*" >> ./diff.txt
+
+  if [[ -s "$source_dir/returners.txt" ]]; then
+    cat "$source_dir/returners.txt" >> ./diff.txt
+  fi
+
+  if [[ -s "$source_dir/single-unfollower-returner-name.txt" ]]; then
+    cat "$source_dir/single-unfollower-returner-name.txt" >> ./diff.txt
+  fi
+fi
+
+echo "Updating data..."
 
 printf "%s\n" "${removed_list[@]}" > "$target_dir/removed_list.txt"
 sort -u "$target_dir/removed_list.txt" | grep -v '^\s*$' > "$target_dir/removed_list_temp.txt"
 mv "$target_dir/removed_list_temp.txt" "$target_dir/removed_list.txt"
-echo "Updating data..."
+
+while read -r id; do
+  if grep -q "^$id$" "$source_dir/single-unfollower-return.txt"; then
+    sed -i "/^$id$/d" "$target_dir/single-unfollower.txt"
+    sort -u "$target_dir/single-unfollower.txt" | grep -v '^\s*$' > "$target_dir/single-unfollower_temp.txt"
+    mv "$target_dir/single-unfollower_temp.txt" "$target_dir/single-unfollower.txt"
+  fi
+done < "$target_dir/single-unfollower.txt"
+cat "$source_dir/single-unfollower.txt" >> "$target_dir/single-unfollower.txt"
+sort -u "$target_dir/single-unfollower.txt" | grep -v '^\s*$' > "$target_dir/single-unfollower_temp.txt"
+mv "$target_dir/single-unfollower_temp.txt" "$target_dir/single-unfollower.txt"
+
 python3 sort/upd.py
 mv ./diff.txt "$target_dir/diff.txt"
 cd "$target_dir"
 git add --all > /dev/null
 git commit -m "$(date +"%Y-%m-%d %H:%M:%S")" > /dev/null
 cd ..
-if [[ -s "info/tguserid.txt" ]] && [[ -s "info/tgapikey.txt" ]]; then
-  echo "Pushing to your Telegram bot..."
-  python3 tgbot.py
+if [[ ! "$@" == *"disable-tg-push"* ]]; then
+  if [[ -s "info/tguserid.txt" ]] && [[ -s "info/tgapikey.txt" ]]; then
+    echo "Pushing to your Telegram bot..."
+    python3 tgbot.py
+  fi
 fi
 cd "$target_dir"
-if [[ -n $(git remote) ]]; then
-  echo "Pushing to your GitHub repository..."
-  git push --force
+if [[ ! "$@" == *"disable-git-push"* ]]; then
+  if [[ -n $(git remote) ]]; then
+    echo "Pushing to your GitHub repository..."
+    git push --force
+  fi
 fi
 cd ..
 sleep 0.5

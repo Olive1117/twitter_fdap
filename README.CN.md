@@ -18,12 +18,9 @@
 
 - GNU/Linux 操作系统
 - Python3 和 pip3
-- 安装了 Tampermonkey 的 Google Chrome
-- 在 Google Chrome 中登录你的 Twitter 账号
-- 在 Tampermonkey 中安装并启用 [twitter-web-exporter](https://github.com/prinsss/twitter-web-exporter) v1.2.0（注意：请使用本 FDAP 脚本中我修改过的 `twitter-web-exporter.js`）
+- Google Chrome
 - 端口 9992 可用
 - jq 版本 1.7.1
-- 在 `id.txt` 中输入你的 Twitter ID
 
 # 使用方法
 
@@ -55,7 +52,7 @@
 
 11. 使用相同方法导出"正在关注"列表
 
-12. 频繁点击`Start Export`来触发Chrome询问是否允许多次下载的弹窗，然后点击允许
+12. 频繁点击`Start Export`来触发Chrome询问是否允许多次下载的弹窗，然后点击`允许`
 
 13. 删除多余的文件
 
@@ -65,6 +62,7 @@
     cd data
     git config --global init.defaultBranch main
     git init
+    cd ..
     ```
     
     （或者在 GitHub 上创建仓库并运行 `git clone [Your repository URL]`）
@@ -82,7 +80,31 @@
     done
     ```
 
-15. 在`info/acknowledgment.txt`中输入`I have followed the above steps`
+15. 在`info/acknowledgment.txt`中输入`I have followed the above steps`   
+
+## 参数
+
+**这些参数只是为了方便我个人开发。请在判断后使用。**
+
+### run.sh
+
+- `--link`: 将 chromium-data 创建为指向 ~/.config/google-chrome 的符号链接。这个参数使你能够使用原来的 Chrome 数据，但如果操作不当可能导致数据丢失。
+
+- `--download=[path]`: 指定下载文件夹。
+
+- `--dd`: 将下载文件夹设置为 ~/Downloads。
+
+- `--kill`: 在运行前关闭 Google Chrome。
+
+- `--custom-count`: 自定义目标数字。
+
+- `--username=[username]`: 更改 Twitter 用户名。
+
+### sort.sh
+
+- `--disable-git-push`: 暂时禁用推送到远程 Git 仓库。
+
+- `--disable-tg-push`: 暂时禁用推送到 Telegram Bot。
 
 # 配置
 
