@@ -1,8 +1,8 @@
-import asyncio
 import websockets
 import json
 import time
 import argparse
+import asyncio
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--following', action='store_true')
@@ -11,6 +11,7 @@ args = parser.parse_args()
 last_fetch = None
 value = 0
 repeat = 0
+rate_retry = 0
 
 async def send_js_code(uri, script):
     async with websockets.connect(uri) as websocket:
@@ -66,6 +67,7 @@ async def check_page_content(uri, target_number):
         else:
             reduce_response = await send_js_code(uri, "if (document.querySelector('pre.leading-none.text-xs.max-h-48.bg-base-200')) { parseInt(document.querySelector('pre.leading-none.text-xs.max-h-48.bg-base-200').textContent.split('\\n').reduce((sum, line) => sum + (line.match(/Followers: (\\\\d+) items received/) ? (50 - parseInt(line.match(/Followers: (\\\\d+) items received/)[1], 10)) : 0), 0)); }")
 
+        global real_target_number
         target_number = int(target_number) if target_number else 0
         reduce_count = reduce_response.get("result", {}).get("result", {}).get("value", 0)
         reduce_count = int(reduce_count) if reduce_count else 0
@@ -86,7 +88,7 @@ async def check_page_content(uri, target_number):
         is_nofollow = await send_js_code(uri, "(() => document.querySelector('.css-175oi2r.r-1kihuf0[data-testid=\"emptyState\"]') != null)();")
         check_retry_button_js_first = """
                     (() => {
-                            return document.querySelector('.css-175oi2r.r-sdzlij.r-1phboty.r-rs99b7.r-lrvibr.r-1ii58gl.r-25kp3t.r-ubg91z.r-1loqt21.r-o7ynqc.r-6416eg.r-1ny4l3l') !== null;
+                            return document.querySelector('button[class*="css-"][class*="r-sdzlij"][style*="background-color: rgb(29, 155, 240);"]') !== null;
                         })();
                 """
         button_exists_response_first = await send_js_code(uri, check_retry_button_js_first)
@@ -103,7 +105,7 @@ async def check_page_content(uri, target_number):
         elif repeat >= 5:
             check_retry_button = """
             (() => {
-                    return document.querySelector('.css-175oi2r.r-sdzlij.r-1phboty.r-rs99b7.r-lrvibr.r-2yi16.r-1qi8awa.r-3pj75a.r-1loqt21.r-o7ynqc.r-6416eg.r-1ny4l3l') == null;
+                    return document.querySelector('button[class*="css-"][class*="r-sdzlij"][style*="background-color: rgb(29, 155, 240);"]') == null;
                 })();
             """
             check_loading_circle = """
@@ -143,18 +145,31 @@ async def scroll_page(uri, first_time):
                 await send_js_code(uri, "window.scrollBy(0, window.innerHeight * 6);")
                 check_retry_button_js = """
                 (() => {
-                        return document.querySelector('.css-175oi2r.r-sdzlij.r-1phboty.r-rs99b7.r-lrvibr.r-1ii58gl.r-25kp3t.r-ubg91z.r-1loqt21.r-o7ynqc.r-6416eg.r-1ny4l3l') !== null;
+                        return document.querySelector('button[class*="css-"][class*="r-sdzlij"][style*="background-color: rgb(29, 155, 240);"]') !== null;
                     })();
                 """
                 button_exists_response = await send_js_code(uri, check_retry_button_js)
                 button_exists = button_exists_response.get('result', {}).get('result', {}).get('value')
+                global rate_retry
                 if button_exists:
-                    print("\nLooks like you've hit Twitter's rate limit. Retrying, this may take a while.")
-                    for i in range(600, -1, -1):
-                        print(f"\r{' ' * 50}", end='')
-                        print(f"\r{i}", end="", flush=True)
-                        time.sleep(1)
-                    await send_js_code(uri, "document.querySelector('button.css-175oi2r.r-sdzlij.r-1phboty.r-rs99b7.r-lrvibr.r-1ii58gl.r-25kp3t.r-ubg91z.r-1loqt21.r-o7ynqc.r-6416eg.r-1ny4l3l').click();")
+                    rate_retry += 1
+                    print(f"\rLooks like you've hit Twitter's rate limit. Retrying...", end='')
+                    await send_js_code(uri, "document.querySelector('button[class*=\"css-\"][class*=\"r-sdzlij\"][style*=\"background-color: rgb(29, 155, 240);\"]')?.click();")
+                    check_loading_circle = """
+                    (() => {
+                    return document.querySelector('div[role="progressbar"][aria-valuemax="1"][aria-valuemin="0"].css-175oi2r.r-1awozwy.r-1777fci') == null;
+                    })();
+                    """
+                    loading_response = await send_js_code(uri, check_loading_circle)
+                    button_exists_response = await send_js_code(uri, check_retry_button_js)
+                    await asyncio.sleep(2)
+                    if not loading_response.get("result", {}).get("result", {}).get("value", "") and button_exists_response.get("result", {}).get("result", {}).get("value", ""):
+                        for i in range(25, -1, -1):
+                            print(f"\r{' ' * 100}", end='')
+                            print(f"\r{i}s Looks like you've hit Twitter's rate limit. Waiting... Retry: {rate_retry} Progress: {value}/{real_target_number}", end='')
+                            time.sleep(1)
+                else:
+                    rate_retry = 0
                 await asyncio.sleep(0.2)
             js_code = """
                 Array.from(document.querySelectorAll('.text-sm.text-base-content.leading-5.text-opacity-70.m-0'))
