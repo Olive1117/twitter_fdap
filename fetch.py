@@ -79,7 +79,7 @@ async def check_page_content(uri, target_number):
         else:
             repeat = 0
         if real_target_number == value:
-            print(f"\r{' ' * 50}", end='')
+            print(f"\r{' ' * 100}", end='')
             print(f"\rProgress: {value}/{real_target_number}", end='')
             print("\nSuccess")
             if not args.following:
@@ -122,15 +122,15 @@ async def check_page_content(uri, target_number):
                     await send_js_code(uri, f"window.location.replace('https://x.com/{id_value}/following')")
                 return True
             else:
-                print(f"\r{' ' * 50}", end='')
+                print(f"\r{' ' * 100}", end='')
                 print(f"\rProgress: {value}/{real_target_number} (Repeat: {repeat})", end='')
                 return False
         else:
             if repeat == 0:
-                print(f"\r{' ' * 50}", end='')
+                print(f"\r{' ' * 100}", end='')
                 print(f"\rProgress: {value}/{real_target_number}", end='')
             else:
-                print(f"\r{' ' * 50}", end='')
+                print(f"\r{' ' * 100}", end='')
                 print(f"\rProgress: {value}/{real_target_number} (Repeat: {repeat})", end='')
             return False
         last_fetch = value
@@ -153,6 +153,7 @@ async def scroll_page(uri, first_time):
                 global rate_retry
                 if button_exists:
                     rate_retry += 1
+                    print(f"\r{' ' * 100}", end='')
                     print(f"\rLooks like you've hit Twitter's rate limit. Retrying...", end='')
                     await send_js_code(uri, "document.querySelector('button[class*=\"css-\"][class*=\"r-sdzlij\"][style*=\"background-color: rgb(29, 155, 240);\"]')?.click();")
                     check_loading_circle = """
@@ -160,10 +161,10 @@ async def scroll_page(uri, first_time):
                     return document.querySelector('div[role="progressbar"][aria-valuemax="1"][aria-valuemin="0"].css-175oi2r.r-1awozwy.r-1777fci') == null;
                     })();
                     """
+                    await asyncio.sleep(2)
                     loading_response = await send_js_code(uri, check_loading_circle)
                     button_exists_response = await send_js_code(uri, check_retry_button_js)
-                    await asyncio.sleep(2)
-                    if not loading_response.get("result", {}).get("result", {}).get("value", "") and button_exists_response.get("result", {}).get("result", {}).get("value", ""):
+                    if not loading_response.get("result", {}).get("result", {}).get("value", "") and not button_exists_response.get("result", {}).get("result", {}).get("value", ""):
                         for i in range(25, -1, -1):
                             print(f"\r{' ' * 100}", end='')
                             print(f"\r{i}s Looks like you've hit Twitter's rate limit. Waiting... Retry: {rate_retry} Progress: {value}/{real_target_number}", end='')

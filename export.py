@@ -40,6 +40,9 @@ async def main(uri):
     await send_js_code(uri, "document.querySelector('.btn.btn-primary').click();")
     await asyncio.sleep(1)
 
+    await send_js_code(uri, "document.querySelectorAll('.checkbox.checkbox-sm')[11].click();")
+    await asyncio.sleep(1)
+
     await send_js_code(uri, "document.querySelectorAll('.btn.btn-primary')[1].click();")
     await asyncio.sleep(1)
 
@@ -64,6 +67,9 @@ async def main(uri):
         await asyncio.sleep(1)
 
     await send_js_code(uri, "document.querySelectorAll('.btn.btn-primary')[2].click();")
+    await asyncio.sleep(1)
+
+    await send_js_code(uri, "document.querySelectorAll('.checkbox.checkbox-sm')[23].click();")
     await asyncio.sleep(1)
 
     await send_js_code(uri, "document.querySelectorAll('.btn.btn-primary')[3].click();")

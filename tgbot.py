@@ -11,7 +11,7 @@ def get_token_and_user_id():
 
 async def send_file_content(bot, user_id):
     try:
-        with open('./diff.txt', 'r') as file:
+        with open('./diff.md', 'r') as file:
             content = file.read()
 
         await bot.send_message(

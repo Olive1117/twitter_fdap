@@ -36,11 +36,14 @@ mkdir -p "$target_dir/removed"
 > "$source_dir/single-unfollower.txt"
 > "$source_dir/single-unfollowing.txt"
 echo "Processing JSON files, this may take a while..."
+
+python3 sort/unique.py
+
 python3 sort/split.py --target_dir=$target_dir
 
-echo "🕒Time: \`$(date +"%Y-%m-%d %H:%M:%S") $(date +%Z)\`" > ./diff.txt
-echo "Username: @\`"$username"\`" >> ./diff.txt
-echo '*'$(jq 'length' ./temp/twitter-Following*.json)' Following, '$(jq 'length' ./temp/twitter-Followers*.json)' Followers*' >> ./diff.txt
+echo "🕒Time: \`$(date +"%Y-%m-%d %H:%M:%S") $(date +%Z)\`" > ./diff.md
+echo "Username: @\`"$username"\`" >> ./diff.md
+echo '*'$(jq 'length' ./temp/twitter-Following.json)' Following, '$(jq 'length' ./temp/twitter-Followers.json)' Followers*' >> ./diff.md
 
 # Step 1: Checking for mutual unfollow
 python3 sort/step1.py --target-dir $target_dir
@@ -53,47 +56,47 @@ python3 sort/step3.py --target-dir $target_dir
 
 # Output Mutual Unfollow, Single Unfollower and Single Unfollowing lists
 if [[ -s "$source_dir/mutual_unfollow.txt" ]]; then
-  echo "*Mutual Unfollow or Removal:*" >> ./diff.txt
+  echo "*Mutual Unfollow or Removal:*" >> ./diff.md
   while IFS= read -r id; do
     target_file="$target_dir/$id.json"
 
     if [[ -f "$target_file" ]]; then
       name=$(jq -r '.name' "$target_file")
       screen_name=$(jq -r '.screen_name' "$target_file")
-      echo "\`$name\` @\`$screen_name\`" >> ./diff.txt
+      echo "\`$name\` @\`$screen_name\`" >> ./diff.md
       mv "$target_file" "$target_dir/removed/$(basename "$target_file")"
       echo "$id" >> "$target_dir/removed_list.txt"
     fi
   done < "$source_dir/mutual_unfollow.txt"
-  echo "" >> ./diff.txt
+  echo "" >> ./diff.md
 fi
 
 if [[ -s "$source_dir/single-unfollower.txt" ]]; then
-  echo "*One-Way Unfollowers:*" >> ./diff.txt
+  echo "*One-Way Unfollowers:*" >> ./diff.md
   while IFS= read -r id; do
     target_file="$target_dir/$id.json"
 
     if [[ -f "$target_file" ]]; then
       name=$(jq -r '.name' "$target_file")
       screen_name=$(jq -r '.screen_name' "$target_file")
-      echo "\`$name\` @\`$screen_name\`" >> ./diff.txt
+      echo "\`$name\` @\`$screen_name\`" >> ./diff.md
     fi
   done < "$source_dir/single-unfollower.txt"
-  echo "" >> ./diff.txt
+  echo "" >> ./diff.md
 fi
 
 if [[ -s "$source_dir/single-unfollowing.txt" ]]; then
-  echo "*One-Way Unfollowing:*" >> ./diff.txt
+  echo "*One-Way Unfollowing:*" >> ./diff.md
   while IFS= read -r id; do
     target_file="$target_dir/$id.json"
 
     if [[ -f "$target_file" ]]; then
       name=$(jq -r '.name' "$target_file")
       screen_name=$(jq -r '.screen_name' "$target_file")
-      echo "\`$name\` @\`$screen_name\`" >> ./diff.txt
+      echo "\`$name\` @\`$screen_name\`" >> ./diff.md
     fi
   done < "$source_dir/single-unfollowing.txt"
-  echo "" >> ./diff.txt
+  echo "" >> ./diff.md
 fi
 
 while read -r id; do
@@ -142,14 +145,14 @@ if [[ -f "$source_file" ]]; then
 fi
 
 if [[ -s "$source_dir/returners.txt" || -s "$source_dir/single-unfollower-returner-name.txt" ]]; then
-  echo "*Returning Follows:*" >> ./diff.txt
+  echo "*Returning Follows:*" >> ./diff.md
 
   if [[ -s "$source_dir/returners.txt" ]]; then
-    cat "$source_dir/returners.txt" >> ./diff.txt
+    cat "$source_dir/returners.txt" >> ./diff.md
   fi
 
   if [[ -s "$source_dir/single-unfollower-returner-name.txt" ]]; then
-    cat "$source_dir/single-unfollower-returner-name.txt" >> ./diff.txt
+    cat "$source_dir/single-unfollower-returner-name.txt" >> ./diff.md
   fi
 fi
 
@@ -170,8 +173,13 @@ cat "$source_dir/single-unfollower.txt" >> "$target_dir/single-unfollower.txt"
 sort -u "$target_dir/single-unfollower.txt" | grep -v '^\s*$' > "$target_dir/single-unfollower_temp.txt"
 mv "$target_dir/single-unfollower_temp.txt" "$target_dir/single-unfollower.txt"
 
-python3 sort/upd.py --target-dir $target_dir
-cp ./diff.txt "$target_dir/diff.txt"
+if jq -e '.[0].metadata' "$target_dir"/*.json > /dev/null 2>&1; then
+    python3 sort/upd.py --target-dir $target_dir
+else
+    mv -f $source_dir/*.json $target_dir
+fi
+
+cp ./diff.md "$target_dir/diff.md"
 cd "$target_dir"
 git add --all > /dev/null
 git commit -m "$(date +"%Y-%m-%d %H:%M:%S")" > /dev/null
@@ -184,7 +192,7 @@ if [[ ! "$@" == *"disable-tg-push"* ]]; then
     else
       python3 tgbot.py
     fi
-    rm ./diff.txt
+    rm ./diff.md
   fi
 fi
 cd "$target_dir"
@@ -201,5 +209,5 @@ fi
 cd $origin_dir
 sleep 0.5
 echo "-----BEGIN DIFF.TXT-----"
-cat "$target_dir/diff.txt"
+cat "$target_dir/diff.md"
 echo "-----END DIFF.TXT-----"
