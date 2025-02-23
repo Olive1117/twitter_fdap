@@ -47,18 +47,24 @@ async def monitor_page_er(uri):
                         null;
                     }
                 }'''
-    response_er = await send_js_code(uri, js_code_er)
-    if response_er is not None:
-        with open('./temp/target_number-1.txt', 'w') as file:
-            file.write(str(response_er))
-    else:
-        await asyncio.sleep(0.1)
-        # 重启脚本：使用 os.execv 替换当前进程，避免嵌套事件循环
-        os.execv(sys.executable, [sys.executable] + sys.argv)
-        # 如果 execv 成功执行，后面的代码不会运行
-        raise SystemExit
+    while True:
+        await asyncio.sleep(0.5)
+        response_er = await send_js_code(uri, js_code_er)
+        if response_er is not None:
+            break
+
+    await send_js_code(uri, "fetch(location.href, { cache: 'reload' }).then(() => location.reload());")
+
+    while True:
+        await asyncio.sleep(0.5)
+        response_er = await send_js_code(uri, js_code_er)
+        if response_er is not None:
+            with open('./temp/target_number-1.txt', 'w') as file:
+                file.write(str(response_er))
+            break
 
 async def monitor_page_ing(uri):
+    await asyncio.sleep(0.5)
     js_code_ing = '''if (!window.scriptElement) {
                     const scriptElement = document.querySelector('script[data-testid="UserProfileSchema-test"]');
                     if (scriptElement) {
@@ -74,13 +80,8 @@ async def monitor_page_ing(uri):
                     }
                 }'''
     response_ing = await send_js_code(uri, js_code_ing)
-    if response_ing is not None:
-        with open('./temp/target_number-2.txt', 'w') as file:
-            file.write(str(response_ing))
-    else:
-        await asyncio.sleep(0.1)
-        os.execv(sys.executable, [sys.executable] + sys.argv)
-        raise SystemExit
+    with open('./temp/target_number-2.txt', 'w') as file:
+        file.write(str(response_ing))
 
 async def main():
     with open('./temp/debug_url.txt', 'r') as file:

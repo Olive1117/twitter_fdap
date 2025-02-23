@@ -102,6 +102,8 @@
 
 - `--proxychains`: 在Proxychains下进行网络传输（也可以用在sort.sh中）。
 
+- `--vnc`: 在VNC中运行Google Chrome。
+
 ### sort.sh
 
 - `--disable-git-push`: 暂时禁用推送到远程 Git 仓库。

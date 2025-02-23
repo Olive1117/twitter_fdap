@@ -16,8 +16,16 @@ async def send_js_code(uri, script):
         return json.loads(response)
 
 async def main(uri):
-    await send_js_code(uri, "document.querySelector('.btn.btn-sm.p-0.w-9.h-9').click();")
-    await asyncio.sleep(1)
+    # 点击第一个按钮：.btn.btn-sm.p-0.w-9.h-9
+    while True:
+        while True:
+            exists = await send_js_code(uri, "document.querySelector('.btn.btn-sm.p-0.w-9.h-9') != null")
+            if exists["result"]["result"]["value"]:
+                break
+            await asyncio.sleep(0.1)
+        await send_js_code(uri, "document.querySelector('.btn.btn-sm.p-0.w-9.h-9').click();")
+        break
+
 
     while True:
         response_followers = await send_js_code(
@@ -29,25 +37,65 @@ async def main(uri):
             break
         elif response_followers["result"]["result"]["value"] != 0:
             break
-        await asyncio.sleep(1)
 
+
+    # 点击复选框 .checkbox（按之前检测元素是否存在）
+    while True:
+        exists = await send_js_code(uri, "document.querySelector('.checkbox') != null")
+        if exists["result"]["result"]["value"]:
+            break
+        await asyncio.sleep(0.1)
     checkbox_status = (await send_js_code(uri, "document.querySelector('.checkbox').checked"))["result"]["result"]["value"]
-
     if checkbox_status == False:
-        await send_js_code(uri, "document.querySelector('.checkbox').click();")
-        await asyncio.sleep(1)
+        while True:
+            await asyncio.sleep(0.1)
+            await send_js_code(uri, "document.querySelector('.checkbox').click();")
+            break
 
-    await send_js_code(uri, "document.querySelector('.btn.btn-primary').click();")
-    await asyncio.sleep(1)
 
-    await send_js_code(uri, "document.querySelectorAll('.checkbox.checkbox-sm')[11].click();")
-    await asyncio.sleep(1)
+    # 点击按钮 .btn.btn-primary
+    while True:
+        while True:
+            exists = await send_js_code(uri, "document.querySelector('.btn.btn-primary') != null")
+            if exists["result"]["result"]["value"]:
+                break
+            await asyncio.sleep(0.1)
+        await send_js_code(uri, "document.querySelector('.btn.btn-primary').click();")
+        break
 
-    await send_js_code(uri, "document.querySelectorAll('.btn.btn-primary')[1].click();")
-    await asyncio.sleep(1)
 
-    await send_js_code(uri, "document.querySelectorAll('.btn.btn-sm.p-0.w-9.h-9')[1].click();")
-    await asyncio.sleep(1)
+    # 点击第12个复选框 .checkbox.checkbox-sm（索引11）
+    while True:
+        while True:
+            exists = await send_js_code(uri, "document.querySelectorAll('.checkbox.checkbox-sm')[11] != undefined")
+            if exists["result"]["result"]["value"]:
+                break
+            await asyncio.sleep(0.1)
+        await send_js_code(uri, "document.querySelectorAll('.checkbox.checkbox-sm')[11].click();")
+        break
+
+
+    # 点击第二个按钮 .btn.btn-primary（索引1）
+    while True:
+        while True:
+            exists = await send_js_code(uri, "document.querySelectorAll('.btn.btn-primary')[1] != undefined")
+            if exists["result"]["result"]["value"]:
+                break
+            await asyncio.sleep(0.1)
+        await send_js_code(uri, "document.querySelectorAll('.btn.btn-primary')[1].click();")
+        break
+
+
+    # 点击第二个按钮 .btn.btn-sm.p-0.w-9.h-9（索引1）
+    while True:
+        while True:
+            exists = await send_js_code(uri, "document.querySelectorAll('.btn.btn-sm.p-0.w-9.h-9')[1] != undefined")
+            if exists["result"]["result"]["value"]:
+                break
+            await asyncio.sleep(0.1)
+        await send_js_code(uri, "document.querySelectorAll('.btn.btn-sm.p-0.w-9.h-9')[1].click();")
+        break
+
 
     while True:
         response_following = await send_js_code(
@@ -59,21 +107,52 @@ async def main(uri):
             break
         elif response_following["result"]["result"]["value"] != 0:
             break
-        await asyncio.sleep(1)
 
+
+    # 点击复选框 document.querySelectorAll('.checkbox')[12]（按之前检测元素是否存在）
+    while True:
+        exists = await send_js_code(uri, "document.querySelectorAll('.checkbox')[12] != undefined")
+        if exists["result"]["result"]["value"]:
+            break
+        await asyncio.sleep(0.1)
     checkbox_status_following = (await send_js_code(uri, "document.querySelectorAll('.checkbox')[12].checked"))["result"]["result"]["value"]
     if checkbox_status_following == False:
+        await asyncio.sleep(0.1)
         await send_js_code(uri, "document.querySelectorAll('.checkbox')[12].click();")
-        await asyncio.sleep(1)
 
-    await send_js_code(uri, "document.querySelectorAll('.btn.btn-primary')[2].click();")
-    await asyncio.sleep(1)
 
-    await send_js_code(uri, "document.querySelectorAll('.checkbox.checkbox-sm')[23].click();")
-    await asyncio.sleep(1)
+    # 点击第三个按钮 .btn.btn-primary（索引2）
+    while True:
+        while True:
+            exists = await send_js_code(uri, "document.querySelectorAll('.btn.btn-primary')[2] != undefined")
+            if exists["result"]["result"]["value"]:
+                break
+            await asyncio.sleep(0.1)
+        await send_js_code(uri, "document.querySelectorAll('.btn.btn-primary')[2].click();")
+        break
 
-    await send_js_code(uri, "document.querySelectorAll('.btn.btn-primary')[3].click();")
-    await asyncio.sleep(1)
+
+    # 点击第24个复选框 .checkbox.checkbox-sm（索引23）
+    while True:
+        while True:
+            exists = await send_js_code(uri, "document.querySelectorAll('.checkbox.checkbox-sm')[23] != undefined")
+            if exists["result"]["result"]["value"]:
+                break
+            await asyncio.sleep(0.1)
+        await send_js_code(uri, "document.querySelectorAll('.checkbox.checkbox-sm')[23].click();")
+        break
+
+
+    # 点击第四个按钮 .btn.btn-primary（索引3）
+    while True:
+        while True:
+            exists = await send_js_code(uri, "document.querySelectorAll('.btn.btn-primary')[3] != undefined")
+            if exists["result"]["result"]["value"]:
+                break
+            await asyncio.sleep(0.1)
+        await send_js_code(uri, "document.querySelectorAll('.btn.btn-primary')[3].click();")
+        break
+
 
 if __name__ == "__main__":
     with open('./temp/debug_url.txt', 'r') as file:

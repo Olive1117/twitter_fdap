@@ -102,7 +102,9 @@ You must obtain an initial version of the follow list to use this script.
 
 - `--username=[username]`: Change the Twitter username.
 
-- `--proxychains`: Traffic network under Proxychains (Can also be used in sort.sh)
+- `--proxychains`: Traffic network under Proxychains (Can also be used in sort.sh).
+
+- `--vnc`: Run Google Chrome with VNC.
 
 ### sort.sh
 

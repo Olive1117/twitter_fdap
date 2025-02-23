@@ -116,7 +116,7 @@ async def check_page_content(uri, target_number):
             retry_button_response = await send_js_code(uri, check_retry_button)
             await asyncio.sleep(0.3)
             loading_response = await send_js_code(uri, check_loading_circle)
-            if retry_button_response.get('result', {}).get('result', {}).get('value') and loading_response.get('result', {}).get('result', {}).get('value'):
+            if retry_button_response.get('result', {}).get('result', {}).get('value') and loading_response.get('result', {}).get('result', {}).get('value') and value + 50 >= real_target_number:
                 print("\nSuccess(inferred)")
                 if not args.following:
                     await send_js_code(uri, f"window.location.replace('https://x.com/{id_value}/following')")

@@ -21,6 +21,10 @@ if [[ "$@" == *"dd"* ]]; then
     download="/home/akira/Downloads"
 fi
 
+if [[ "$@" == *"vnc"* ]]; then
+    echo "VNC mode enabled"
+fi
+
 for arg in "$@"; do
   if [[ "$arg" == --username=* ]]; then
     echo "${arg#--username=}" > ./info/id.txt
@@ -52,10 +56,13 @@ if [[ "$@" == *"kill"* ]]; then
 fi
 
 sleep 2
-#echo "Starting VNC Server..."
-#vncserver :2 -xstartup "/usr/bin/xterm" > /dev/null 2>&1
-#sleep 1
-#export DISPLAY=:2
+
+if [[ "$@" == *"vnc"* ]]; then
+  echo "Starting VNC Server..."
+  vncserver :2 -xstartup "/usr/bin/xterm" > /dev/null 2>&1
+  sleep 1
+  export DISPLAY=:2
+fi
 
 if [[ ! -f "./info/id.txt" ]] || [[ ! -s "./info/id.txt" ]]; then
   read -p "Enter your Twitter username (without '@'): " input
@@ -69,8 +76,11 @@ if [[ ! -e "./chromium-data" ]]; then
   exit 1
 fi
 echo 'Starting Google Chrome...'
-#google-chrome "https://x.com/"$(cat info/id.txt) --remote-debugging-port=9222 --no-sandbox --disable-gpu --User-Agent='TwitterAndroid/10.76.0-release.0 (310760000-r-0) CPH2609/15 (OnePlus;CPH2609;OnePlus;CPH2609;0;;1;2016)' --user-data-dir=./chromium-data --start-maximized --window-size=720,1280 --enable-low-end-device-mode > /dev/null 2>&1 &
-google-chrome "https://x.com/"$(cat info/id.txt) --remote-debugging-port=9222 --no-sandbox --disable-gpu --headless=new --User-Agent='TwitterAndroid/10.76.0-release.0 (310760000-r-0) CPH2609/15 (OnePlus;CPH2609;OnePlus;CPH2609;0;;1;2016)' --user-data-dir=./chromium-data --start-maximized --window-size=720,1280 --enable-low-end-device-mode > /dev/null 2>&1 &
+if [[ "$@" == *"vnc"* ]]; then
+  DISPLAY=:2 google-chrome "https://x.com/"$(cat info/id.txt) --remote-debugging-port=9222 --no-sandbox --disable-gpu --User-Agent='TwitterAndroid/10.76.0-release.0 (310760000-r-0) CPH2609/15 (OnePlus;CPH2609;OnePlus;CPH2609;0;;1;2016)' --user-data-dir=./chromium-data --start-maximized --window-size=720,1280 --enable-low-end-device-mode > /dev/null 2>&1 &
+else
+  google-chrome "https://x.com/"$(cat info/id.txt) --remote-debugging-port=9222 --no-sandbox --disable-gpu --headless=new --User-Agent='TwitterAndroid/10.76.0-release.0 (310760000-r-0) CPH2609/15 (OnePlus;CPH2609;OnePlus;CPH2609;0;;1;2016)' --user-data-dir=./chromium-data --start-maximized --window-size=720,1280 --enable-low-end-device-mode > /dev/null 2>&1 &
+fi
 CHROMIUM_PID=$!
 #cpulimit -p $CHROMIUM_PID -l 60 &
 while true; do
@@ -129,8 +139,10 @@ else
 fi
 rm -rf ./temp/*
 #pkill -f cpulimit
-#pkill -f vncserver
-#pkill -f tigervnc
+if [[ "$@" == *"vnc"* ]]; then
+  pkill -f vncserver
+  pkill -f tigervnc
+fi
 if [[ "$@" == *"link"* ]]; then
     rm ./chromium-data
 fi
