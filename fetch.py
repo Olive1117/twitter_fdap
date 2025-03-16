@@ -79,7 +79,7 @@ async def check_page_content(uri, target_number):
         else:
             repeat = 0
         if real_target_number == value:
-            print(f"\r{' ' * 100}", end='')
+            print(f"\r{' ' * 60}", end='')
             print(f"\rProgress: {value}/{real_target_number}", end='')
             print("\nSuccess")
             if not args.following:

@@ -45,16 +45,12 @@ echo "🕒Time: \`$(date +"%Y-%m-%d %H:%M:%S") $(date +%Z)\`" > ./diff.md
 echo "Username: @\`"$username"\`" >> ./diff.md
 echo '*'$(jq 'length' ./temp/twitter-Following.json)' Following, '$(jq 'length' ./temp/twitter-Followers.json)' Followers*' >> ./diff.md
 
-# Step 1: Checking for mutual unfollow
 python3 sort/step1.py --target-dir $target_dir
 
-# Step 2: Checking followed_by status
 python3 sort/step2.py --target-dir $target_dir
 
-# Step 3: Checking following status
 python3 sort/step3.py --target-dir $target_dir
 
-# Output Mutual Unfollow, Single Unfollower and Single Unfollowing lists
 if [[ -s "$source_dir/mutual_unfollow.txt" ]]; then
   echo "*Mutual Unfollow or Removal:*" >> ./diff.md
   while IFS= read -r id; do
@@ -63,7 +59,7 @@ if [[ -s "$source_dir/mutual_unfollow.txt" ]]; then
     if [[ -f "$target_file" ]]; then
       name=$(jq -r '.name' "$target_file")
       screen_name=$(jq -r '.screen_name' "$target_file")
-      echo "\`$name\` @\`$screen_name\`" >> ./diff.md
+      echo "\`$(echo "$name" | sed 's/`//g')\` @\`$screen_name\`" >> ./diff.md
       mv "$target_file" "$target_dir/removed/$(basename "$target_file")"
       echo "$id" >> "$target_dir/removed_list.txt"
     fi
@@ -79,7 +75,7 @@ if [[ -s "$source_dir/single-unfollower.txt" ]]; then
     if [[ -f "$target_file" ]]; then
       name=$(jq -r '.name' "$target_file")
       screen_name=$(jq -r '.screen_name' "$target_file")
-      echo "\`$name\` @\`$screen_name\`" >> ./diff.md
+      echo "\`$(echo "$name" | sed 's/`//g')\` @\`$screen_name\`" >> ./diff.md
     fi
   done < "$source_dir/single-unfollower.txt"
   echo "" >> ./diff.md
@@ -93,7 +89,7 @@ if [[ -s "$source_dir/single-unfollowing.txt" ]]; then
     if [[ -f "$target_file" ]]; then
       name=$(jq -r '.name' "$target_file")
       screen_name=$(jq -r '.screen_name' "$target_file")
-      echo "\`$name\` @\`$screen_name\`" >> ./diff.md
+      echo "\`$(echo "$name" | sed 's/`//g')\` @\`$screen_name\`" >> ./diff.md
     fi
   done < "$source_dir/single-unfollowing.txt"
   echo "" >> ./diff.md
@@ -125,7 +121,7 @@ for source_file in "$source_dir"/*.json; do
     if [[ -f "$target_file" ]]; then
       name=$(jq -r '.name' "$source_file")
       screen_name=$(jq -r '.screen_name' "$source_file")
-      echo "\`$name\` @\`$screen_name\`" >> "$source_dir/returners.txt"
+      echo "\`$(echo "$name" | sed 's/`//g')\` @\`$screen_name\`" >> "$source_dir/returners.txt"
       rm -f "$target_file"
       removed_list=("${removed_list[@]/$id}")
     fi
@@ -136,10 +132,10 @@ if [[ -s "$source_dir/single-unfollower-return.txt" ]]; then
     while IFS= read -r id; do
     source_file="$source_dir/$id.json"
 
-if [[ -f "$source_file" ]]; then
+    if [[ -f "$source_file" ]]; then
       name=$(jq -r '.name' "$source_file")
       screen_name=$(jq -r '.screen_name' "$source_file")
-      echo "\`$name\` @\`$screen_name\`" >> "$source_dir/single-unfollower-returner-name.txt"
+      echo "\`$(echo "$name" | sed 's/`//g')\` @\`$screen_name\`" >> "$source_dir/single-unfollower-returner-name.txt"
     fi
   done < "$source_dir/single-unfollower-return.txt"
 fi
@@ -173,7 +169,7 @@ cat "$source_dir/single-unfollower.txt" >> "$target_dir/single-unfollower.txt"
 sort -u "$target_dir/single-unfollower.txt" | grep -v '^\s*$' > "$target_dir/single-unfollower_temp.txt"
 mv "$target_dir/single-unfollower_temp.txt" "$target_dir/single-unfollower.txt"
 
-if jq -e '.[0].metadata' "$target_dir"/*.json > /dev/null 2>&1; then
+if jq -e '.metadata' "$target_dir"/*.json > /dev/null 2>&1; then
     python3 sort/upd.py --target-dir $target_dir
 else
     mv -f $source_dir/*.json $target_dir

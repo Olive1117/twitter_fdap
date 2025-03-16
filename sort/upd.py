@@ -2,7 +2,7 @@ import os
 import json
 import shutil
 import argparse
-
+ 
 source_dir = "./temp/data"
 parser = argparse.ArgumentParser()
 parser.add_argument("--target-dir", type=str, required=True)
