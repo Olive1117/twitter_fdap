@@ -1,135 +1,83 @@
-# Twitter FDAP
+# Twitter FDAP（关注变动自动推送脚本）
 
-一个用于自动导出和检查你的 X(Twitter) 关注者和正在关注列表差异的 Linux 脚本。
+一个用于自动导出并追踪你在 X（原 Twitter）上的关注者与关注列表变动的 Python 脚本。
 
-[English](README.md) | 简体中文
+**FDAP** = Followers Diff Auto Push（关注变动自动推送）
 
-# 联系方式
+[English](README.md) | **简体中文**
 
-在 [Twitter](https://x.com/Ak1raQ_love) 上联系我 @Ak1raQ_love。
+---
 
-# 警告
+## 功能特点
 
-此脚本仅供个人使用。在你的计算机上运行时可能会出现错误。请确保你理解代码并根据需要进行修改。
+- 导出 X（Twitter）上的关注者和关注列表  
+- 自动检测并追踪每次导出之间的变化  
+- 自动推送更新到 GitHub 或 Telegram，方便查看  
 
-**对于中国用户：请将脚本语言切换为English，否则无法正常运行！**
+---
 
-# 环境要求
+## 注意事项
 
-- GNU/Linux 操作系统
-- Python3 和 pip3
-- Google Chrome
-- 端口 9992 可用
-- jq 版本 1.7.1
+本脚本为**个人使用**而设计，在其他系统上可能无法正常运行。使用前请根据自身需求阅读并修改代码。
 
-# 使用方法
+---
 
-克隆仓库并运行 `run.sh` 脚本。
+## 环境要求
 
-## 首次运行
+- Python 3.4 或更高版本  
+- Twitter Web Exporter 2.1 或更高版本  
+- 开启远程调试模式的 Google Chrome  
+- Tampermonkey 浏览器扩展  
 
-你必须先获取关注列表的初始版本才能使用此脚本。
+---
 
-1. 切换到脚本所在目录
+## 安装与使用
 
-2. 运行`pip3 install ./requirements.txt`
-
-3. 使用 `--user-data-dir=./chromium-data` 参数启动 Google Chrome
-
-4. 安装 tampermonkey 和我修改过的 twitter-web-exporter
-
-5. 将下载目录设置为 `./temp`
-
-6. 登录你的 Twitter 账号并访问 [https://x.com/[你的Twitter-ID]/followers/](https://x.com/%5B你的Twitter-ID%5D/followers/)
-
-7. 允许 `x.com` 的pop-ups权限
-
-8. 滚动到列表底部
-
-9. 点击左侧的猫咪图标展开菜单
-
-10. 点击相应行的箭头，勾选顶部复选框，然后点击 `Export Data` 再点击 `Start Export`
-
-11. 使用相同方法导出"正在关注"列表
-
-12. 频繁点击`Start Export`来触发Chrome询问是否允许多次下载的弹窗，然后点击`允许`
-
-13. 删除多余的文件
-
-14. 在脚本目录下运行以下命令：
-    
-    ```bash
-    cd data
-    git config --global init.defaultBranch main
-    git init
-    cd ..
-    ```
-    
-    （或者在 GitHub 上创建仓库并运行 `git clone [Your repository URL]`）
-    
-    然后运行：
-    
-    ```bash
-    jq -c '.[]' ./temp/twitter-Followers-*.json | while read -r item; do
-      id=$(echo "$item" | jq -r '.id')
-      echo "$item" | jq . > "./data/${id}.json"
-    done
-    jq -c '.[]' ./temp/twitter-Following-*.json | while read -r item; do
-      id=$(echo "$item" | jq -r '.id')
-      echo "$item" | jq . > "./data/${id}.json"
-    done
-    ```
-
-15. 在`info/acknowledgment.txt`中输入`I have followed the above steps`   
-
-## 参数
-
-**这些参数只是为了方便我个人开发。请在判断后使用。**
-
-### run.sh
-
-- `--link`: 将 chromium-data 创建为指向 ~/.config/google-chrome 的符号链接。这个参数使你能够使用原来的 Chrome 数据，但如果操作不当可能导致数据丢失。
-
-- `--download=[path]`: 指定下载文件夹。
-
-- `--dd`: 将下载文件夹设置为 ~/Downloads。
-
-- `--kill`: 在运行前关闭 Google Chrome。
-
-- `--custom-count`: 自定义目标数字。
-
-- `--username=[username]`: 更改 Twitter 用户名。
-
-- `--proxychains`: 在Proxychains下进行网络传输（也可以用在sort.sh中）。
-
-- `--vnc`: 在VNC中运行Google Chrome。
-
-### sort.sh
-
-- `--disable-git-push`: 暂时禁用推送到远程 Git 仓库。
-
-- `--disable-tg-push`: 暂时禁用推送到 Telegram Bot。
-
-# 配置
-
-创建 `info` 文件夹
-
-在 `info/id.txt` 中输入你的 Twitter ID。
-
-## 推送到 Telegram 机器人
-
-在 `info/tgapi.txt` 中输入你的 Telegram 机器人 API 密钥。
-
-在 `info/tguserid.txt` 中输入你的 Telegram 用户 ID（一个数字）。
-
-## 推送到 GitHub 仓库
-
-切换到 `data` 文件夹并运行：
+### 1. 克隆项目仓库
 
 ```bash
-git remote set-url origin https://your_username:your_token@[Your repository URL]
+git clone https://github.com/your_username/twitter_fdap.git
+cd twitter_fdap
 ```
 
-# 视频教程
+### 2. 安装依赖
 
-https://youtu.be/RRp5NUd1Jrg
+```bash
+pip3 install -r requirements.txt
+```
+
+### 3. 配置脚本
+
+在 `config.ini` 中更新以下内容：
+
+- 你的 Twitter ID（可使用 [Twitter ID Converter](https://tweethunter.io/twitter-id-converter) 获取）
+- Chrome 的远程调试URL
+- Chrome 的下载目录路径
+
+
+### 4. 初始化数据目录
+
+```bash
+cd data
+git config --global init.defaultBranch main
+git init
+cd ..
+```
+
+### 5. 运行
+```bash
+python3 ./main.py
+```
+
+或者，克隆一个已有的 GitHub 仓库
+
+
+## 联系方式
+
+欢迎通过 [Twitter](https://x.com/P5KAban) (@P5KAban) 联系作者。
+
+---
+
+## 免责声明
+
+本脚本以“原样”提供，使用风险由您自行承担。使用前请确保已了解其功能与操作方式。

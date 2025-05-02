@@ -1,137 +1,84 @@
 # Twitter FDAP
 
-A Linux script for exporting and checking the diff in your X(Twitter) followers and following list automatically.
+A Python script to automatically export and track changes in your X (formerly Twitter) followers and following lists.
 
-FDAP = Followers Diff Auto Push
+**FDAP** = Followers Diff Auto Push
 
-English | [简体中文](README.CN.md)
+**English** | [简体中文](README.CN.md)
 
-# Contact Me
+---
 
-Contact me on [Twitter](https://x.com/Ak1raQ_love) @Ak1raQ_love.
+## Features
 
-# Warning
+- Export followers and following lists from X (Twitter).
+- Automatically detect and track changes between exports.
+- Push updates to GitHub or Telegram for easy access.
 
-The script is intended for my personal use. It may cause bugs or errors when run on your computer. Make sure you understand the code and modify it as necessary.
+---
 
-**For Chinese users: 请将脚本语言切换为English,否则无法正常运行！**
+## Warning
 
-# Requirements
+This script is intended for personal use and may not function as expected on other systems (besides GNU/Linux). Please review and modify the code as necessary before using it.
 
-- GNU/Linux Operating System
-- Python3 and pip3
-- Google Chrome
-- Port 9992 should be available
-- jq version 1.7.1
+---
 
-# Usage
+## Requirements
 
-Clone the repository and run the script `run.sh`.
+- Python 3.4 or higher
+- Twitter Web Exporter 2.1 or higher
+- Google Chrome with remote debugging enabled
+- Tampermonkey browser extension
 
-## First Run
+---
 
-You must obtain an initial version of the follow list to use this script.
+## Usage
 
-1. Change your dir to the script
-
-2. Run `pip3 install -r ./requirements.txt`
-
-3. Start Google Chrome with `--user-data-dir=./chromium-data`
-
-4. Install tampermonkey and my modified twitter-web-exporter
-
-5. Set the download dictionary to `./temp`
-
-6. Sign in your Twitter Account and visit [https://x.com/[Your-Twitter-ID]/followers/](https://x.com/%5BYour-Twitter-ID%5D/followers/)
-
-7. Allow `x.com` pop-ups
-
-8. Scroll to the bottom of the list.
-
-9. Click the cat icon on the left to expand the menu.
-
-10. Click the arrowhead in the corresponding row, check the checkbox at the top, and click `Export Data` then `Start Export`.
-
-11. Use the same method to export the 'following' list.
-
-12. Press the `Start Export` button quickly to trigger the notification requesting permission for multiple downloads, then click `Allow`.
-
-13. Delete the extra files.
-
-14. Run the following commands in the directory of this script:
-    
-    ```bash
-    cd data
-    git config --global init.defaultBranch main
-    git init
-    cd ..
-    ```
-    
-    (Alternatively, create a repository on GitHub and run `git clone [Your repo URL]`)
-    
-    Then run:
-    
-    ```bash
-    jq -c '.[]' ./temp/twitter-Followers-*.json | while read -r item; do
-      id=$(echo "$item" | jq -r '.id')
-      echo "$item" | jq . > "./data/${id}.json"
-    done
-    jq -c '.[]' ./temp/twitter-Following-*.json | while read -r item; do
-      id=$(echo "$item" | jq -r '.id')
-      echo "$item" | jq . > "./data/${id}.json"
-    done
-    ```
-
-15. Enter `I have followed the above steps` into `info/acknowledgment.txt`.
-
-## Parameters
-
-**These parameters are for more convenient development just for me. Use them after making a judgment.**
-
-### run.sh
-
-- `--link`: Create a symbolic link from chromium-data to ~/.config/google-chrome. This parameter makes it possible to use your usual Chrome data, but improper operation may lead to data loss.
-
-- `--download=[path]`: Specify the download folder.
-
-- `--dd`: Set the download folder to ~/Downloads.
-
-- `--kill`: Kill Google Chrome before running.
-
-- `--custom-count`: Customize the target numbers.
-
-- `--username=[username]`: Change the Twitter username.
-
-- `--proxychains`: Traffic network under Proxychains (Can also be used in sort.sh).
-
-- `--vnc`: Run Google Chrome with VNC.
-
-### sort.sh
-
-- `--disable-git-push`: Temporarily disable pushing to the remote Git repository.
-
-- `--disable-tg-push`: Temporarily disable pushing to the Telegram bot.
-
-# Configuration
-
-Create a folder `info`
-
-Enter your Twitter ID in `info/id.txt`.
-
-## Push to Telegram bot
-
-Enter your Telegram bot API key in `info/tgapi.txt`.
-
-Enter your Telegram User ID (a number) in `info/tguserid.txt`.
-
-## Push to GitHub repository
-
- Change to the `data` folder and run:
+### 1. Clone the Repository
 
 ```bash
-git remote set-url origin https://your_username:your_token@[Your repo URL]
+git clone https://github.com/MtFloveU/twitter_fdap.git
+cd twitter_fdap
 ```
 
-# Video Guide
+### 2. Install Dependencies
 
-https://youtu.be/RRp5NUd1Jrg
+```bash
+pip3 install -r requirements.txt
+```
+
+### 3. Configure the Script
+
+- Update `config.ini` with:
+  - Your Twitter ID (use [Twitter ID Converter](https://tweethunter.io/twitter-id-converter)).
+  - Chrome's debugging url.
+  - Chrome's download directory.
+
+### 4. Initialize Data Directory
+
+```bash
+cd data
+git config --global init.defaultBranch main
+git init
+cd ..
+```
+
+Alternatively, clone an existing Git repository
+
+### 5. Run It
+
+```bash
+python3 main.py
+```
+
+
+---
+
+## Contact
+
+Feel free to reach out on [Twitter](https://x.com/P5KAban) (@P5KAban).
+
+---
+
+## Disclaimer
+
+This script is provided as-is. Use it at your own risk and ensure you understand its functionality before running it.

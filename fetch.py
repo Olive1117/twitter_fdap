@@ -3,6 +3,7 @@ import json
 import time
 import argparse
 import asyncio
+import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--following', action='store_true')
@@ -12,6 +13,7 @@ last_fetch = None
 value = 0
 repeat = 0
 rate_retry = 0
+terminal_width = os.get_terminal_size().columns
 
 async def send_js_code(uri, script):
     async with websockets.connect(uri) as websocket:
@@ -54,9 +56,9 @@ async def check_page_content(uri, target_number):
 
     try:
         if args.following:
-            js_code = "parseInt(document.querySelectorAll('.flex.flex-col.flex-grow .text-sm')[1].innerText.trim());"
+            js_code = "parseInt(document.querySelectorAll('.text-sm.text-base-content.leading-5.text-opacity-70.m-0')[1].innerText.match(/\d+/)[0]);"
         else:
-            js_code = "parseInt(document.querySelector('.flex.flex-col.flex-grow .text-sm').innerText.trim());"
+            js_code = "parseInt(document.querySelectorAll('.text-sm.text-base-content.leading-5.text-opacity-70.m-0')[0].innerText.match(/\d+/)[0]);"
         response = await send_js_code(uri, js_code)
 
         value = response.get("result", {}).get("result", {}).get("value", 0)
@@ -79,7 +81,7 @@ async def check_page_content(uri, target_number):
         else:
             repeat = 0
         if real_target_number == value:
-            print(f"\r{' ' * 60}", end='')
+            print(f"\r{' ' * terminal_width}", end='')
             print(f"\rProgress: {value}/{real_target_number}", end='')
             print("\nSuccess")
             if not args.following:
@@ -122,15 +124,15 @@ async def check_page_content(uri, target_number):
                     await send_js_code(uri, f"window.location.replace('https://x.com/{id_value}/following')")
                 return True
             else:
-                print(f"\r{' ' * 100}", end='')
+                print(f"\r{' ' * terminal_width}", end='')
                 print(f"\rProgress: {value}/{real_target_number} (Repeat: {repeat})", end='')
                 return False
         else:
             if repeat == 0:
-                print(f"\r{' ' * 100}", end='')
+                print(f"\r{' ' * terminal_width}", end='')
                 print(f"\rProgress: {value}/{real_target_number}", end='')
             else:
-                print(f"\r{' ' * 100}", end='')
+                print(f"\r{' ' * terminal_width}", end='')
                 print(f"\rProgress: {value}/{real_target_number} (Repeat: {repeat})", end='')
             return False
         last_fetch = value
@@ -153,7 +155,7 @@ async def scroll_page(uri, first_time):
                 global rate_retry
                 if button_exists:
                     rate_retry += 1
-                    print(f"\r{' ' * 100}", end='')
+                    print(f"\r{' ' * terminal_width}", end='')
                     print(f"\rLooks like you've hit Twitter's rate limit. Retrying...", end='')
                     await send_js_code(uri, "document.querySelector('button[class*=\"css-\"][class*=\"r-sdzlij\"][style*=\"background-color: rgb(29, 155, 240);\"]')?.click();")
                     check_loading_circle = """
@@ -164,9 +166,9 @@ async def scroll_page(uri, first_time):
                     await asyncio.sleep(2)
                     loading_response = await send_js_code(uri, check_loading_circle)
                     button_exists_response = await send_js_code(uri, check_retry_button_js)
-                    if not loading_response.get("result", {}).get("result", {}).get("value", "") and not button_exists_response.get("result", {}).get("result", {}).get("value", ""):
+                    if loading_response.get("result", {}).get("result", {}).get("value", "") and button_exists_response.get("result", {}).get("result", {}).get("value", ""):
                         for i in range(25, -1, -1):
-                            print(f"\r{' ' * 100}", end='')
+                            print(f"\r{' ' * terminal_width}", end='')
                             print(f"\r{i}s Looks like you've hit Twitter's rate limit. Waiting... Retry: {rate_retry} Progress: {value}/{real_target_number}", end='')
                             time.sleep(1)
                 else:
@@ -185,7 +187,7 @@ async def main():
     global id_value
     with open('./temp/debug_url.txt', 'r') as file:
         websocket_url = file.read().strip()
-    with open('./info/id.txt', 'r') as file:
+    with open('./temp/id.txt', 'r') as file:
         id_value = file.read().strip()
 
     if args.following:
