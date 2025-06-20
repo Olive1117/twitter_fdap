@@ -25,7 +25,7 @@ This script is intended for personal use and may not function as expected on oth
 ## Requirements
 
 - Python 3.4 or higher
-- Twitter Web Exporter 2.1 or higher
+- [Twitter Web Exporter](https://github.com/prinsss/twitter-web-exporter) 1.3.0 or higher
 - Google Chrome with remote debugging enabled
 - Tampermonkey browser extension
 
